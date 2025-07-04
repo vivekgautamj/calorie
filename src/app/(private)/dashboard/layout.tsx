@@ -1,18 +1,13 @@
-"use client"
 import { redirect } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { auth } from "../../../auth";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import LogoutButton from "@/components/logout-button";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-    const { data: session, status } = useSession();
+const Layout = async ({ children }: { children: React.ReactNode }) => {
+    const session = await auth();
 
-    if (status === "loading") {
-        return <div>Loading...</div>;
-    }
-
-    if (!session) {
+    if (!session?.user) {
         redirect("/login");
     }
 
@@ -41,12 +36,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                                 )}
                             </div>
                         </div>
-                        <Button 
-                            onClick={() => signOut()}
-                            variant="destructive"
-                        >
-                            Logout
-                        </Button>
+                        <LogoutButton />
                     </div>
                 </CardContent>
             </Card>
