@@ -13,7 +13,7 @@ const DashboardPage = () => {
                     <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
                     <p className="text-muted-foreground">Manage your thumbnail AB tests</p>
                 </div>
-                <Button className="flex items-center gap-2">
+                <Button>
                     <Plus className="w-4 h-4" />
                     New Test
                 </Button>
@@ -28,7 +28,7 @@ const DashboardPage = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            <Button variant="ghost" className="w-full justify-start">
+                            <Button  className="w-full justify-start">
                                 <Plus className="w-4 h-4 mr-3" />
                                 Create New Test
                             </Button>

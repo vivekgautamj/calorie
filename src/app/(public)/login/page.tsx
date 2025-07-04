@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { LoginForm } from "@/components/ui/login";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function SignIn() {
     const { data: session } = useSession();
@@ -14,6 +17,7 @@ export default function SignIn() {
     }
 
     return (
+      <>
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
             <div className="max-w-md w-full">
                 {/* Header */}
@@ -85,5 +89,20 @@ export default function SignIn() {
                 </div>
             </div>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Login to your account</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input type="email" placeholder="Email" />
+            <Input type="password" placeholder="Password" />
+            <Button>Login</Button>
+          </CardContent>
+          <CardFooter>
+            <Button>Login</Button>
+            </CardFooter>
+        </Card>
+      </>
     );
 }
