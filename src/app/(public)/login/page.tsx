@@ -10,5 +10,5 @@ export default function SignIn() {
         redirect("/dashboard");
     }
 
-  return <button onClick={() => signIn("twitter")}>Login with Twitter</button>;
+  return <button onClick={() => signIn("google")}>Login with Google</button>;
 }

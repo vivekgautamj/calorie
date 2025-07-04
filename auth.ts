@@ -1,11 +1,11 @@
 import NextAuth from "next-auth"
-import Twitter from "next-auth/providers/twitter"
+import Google from "next-auth/providers/google"
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    Twitter({
-      clientId: process.env.TWITTER_CLIENT_ID,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET,
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
   debug: true,
