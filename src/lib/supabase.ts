@@ -9,6 +9,7 @@ export async function createOrUpdateUser(userData: {
   email: string
   name: string
   image?: string
+  country?: string
 }) {
   try {
     const { data, error } = await supabase
@@ -19,6 +20,10 @@ export async function createOrUpdateUser(userData: {
           name: userData.name,
           image: userData.image,
           updated_at: new Date().toISOString(),
+          // Use country from Google or default to 'US'
+          country: userData.country || 'US',
+          timezone: 'UTC',
+          subscription_status: 'free',
         },
         {
           onConflict: 'email', // Use email as the conflict resolution key

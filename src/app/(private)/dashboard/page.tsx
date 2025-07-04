@@ -90,7 +90,7 @@ const DashboardPage = async () => {
                                     <p className="text-muted-foreground font-mono text-xs">{session.user.id}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium">Supabase User ID:</p>
+                                    <p className="text-sm font-medium">User ID:</p>
                                     <p className="text-muted-foreground font-mono text-xs">{(session.user as any).userId || "Not available"}</p>
                                 </div>
                             </div>
