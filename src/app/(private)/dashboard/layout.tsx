@@ -12,7 +12,9 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     return (
         <div className="min-h-screen bg-background p-4">
             <DashboardHeader user={session.user} />
-            {children}
+            <div className="flex flex-col gap-4">
+                {children}
+            </div>
         </div>
     );
 };

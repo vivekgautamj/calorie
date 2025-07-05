@@ -1,9 +1,10 @@
-import { Plus, BarChart3, Users, TrendingUp, Clock, Target } from "lucide-react";
+import { Plus, BarChart3, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 const DashboardPage = async () => {
     const session = await auth();
@@ -13,8 +14,6 @@ const DashboardPage = async () => {
         redirect('/login');
     }
     
-    console.log('User session:', session);
-    
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -23,10 +22,12 @@ const DashboardPage = async () => {
                     <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
                     <p className="text-muted-foreground">Manage your thumbnail AB tests</p>
                 </div>
-                <Button>
-                    <Plus className="w-4 h-4" />
-                    New Test
-                </Button>
+                <Link href="/dashboard/create">
+                    <Button>
+                        <Plus className="w-4 h-4" />
+                        New Test
+                    </Button>
+                </Link>
             </div>
            
             {/* Quick Actions */}
@@ -37,18 +38,19 @@ const DashboardPage = async () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            <Button className="w-full justify-start">
+                            <Button className="w-full justify-start" asChild>
+                                <Link href="/dashboard/create">
+                                    <Plus className="w-4 h-4 mr-3" />
+                                    Create New AB Clash
+                                </Link>
+                            </Button>
+                            <Button className="w-full justify-start bg-blue-50 text-blue-600 hover:bg-blue-100" asChild>
+                                <Link href="/dashboard/clashes">
                                 <Plus className="w-4 h-4 mr-3" />
-                                Create New Test
+                                View all AB Clashes
+                                </Link>
                             </Button>
-                            <Button variant="ghost" className="w-full justify-start">
-                                <BarChart3 className="w-4 h-4 mr-3" />
-                                View Analytics
-                            </Button>
-                            <Button variant="ghost" className="w-full justify-start">
-                                <Users className="w-4 h-4 mr-3" />
-                                Manage Audience
-                            </Button>
+                           
                         </div>
                     </CardContent>
                 </Card>
