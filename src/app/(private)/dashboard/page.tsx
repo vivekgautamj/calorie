@@ -1,5 +1,3 @@
-"use client";
-
 import { Plus, BarChart3, Users, TrendingUp, Clock, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,13 +56,13 @@ const DashboardPage = async () => {
                 {/* User Info Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>User Information</CardTitle>
+                        <CardTitle>Profile</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             {/* User Avatar */}
                             {session.user.image && (
-                                <div className="flex justify-center">
+                                <div className="flex">
                                     <div className="relative w-20 h-20 rounded-full overflow-hidden">
                                         <Image
                                             src={session.user.image}
