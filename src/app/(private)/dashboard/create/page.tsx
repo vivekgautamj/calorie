@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon, X, Loader2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -32,11 +31,6 @@ interface ClashOption {
   image_url?: string;
   image_file?: File;
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 function OptionImageUpload({
   value,
@@ -67,8 +61,8 @@ function OptionImageUpload({
       setError("Only JPG, PNG, WEBP, SVG allowed");
       return;
     }
-    if (file.size > 20 * 1024 * 1024) {
-      setError("Max file size is 20MB");
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Max file size is 5MB");
       return;
     }
     setError("");
@@ -92,7 +86,7 @@ function OptionImageUpload({
             <div className="mb-1">Upload</div>
             <div className="text-xs text-muted-foreground text-center">
               Choose images or drag & drop it here.<br />
-              JPG, JPEG, PNG, WEBP, SVG. Max 20 MB.
+              JPG, JPEG, PNG, WEBP, SVG. Max 5 MB.
             </div>
           </>
         )}
@@ -183,19 +177,43 @@ const CreatePage = () => {
     setIsLoading(true);
     setError("");
     try {
-      // Upload all images first
+      // Upload all images first using signed URLs
       const uploadedOptions = await Promise.all(options.map(async (option) => {
         if (option.image_file) {
-          const file = option.image_file;
-          const fileExt = file.name.split(".").pop();
-          const filePath = `clash-options/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage.from("clsh").upload(filePath, file, { upsert: true });
-          if (uploadError) throw uploadError;
-          const { data } = supabase.storage.from("clsh").getPublicUrl(filePath);
+          // Step 1: Get signed URL from API
+          const signedUrlResponse = await fetch('/api/upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fileName: option.image_file.name,
+              fileType: option.image_file.type,
+              fileSize: option.image_file.size,
+            }),
+          });
+          
+          if (!signedUrlResponse.ok) {
+            const uploadError = await signedUrlResponse.json();
+            throw new Error(uploadError.error || 'Failed to get upload URL');
+          }
+          
+          const { signedUrl, publicUrl } = await signedUrlResponse.json();
+          
+          // Step 2: Upload file directly to Supabase using signed URL
+          const uploadResponse = await fetch(signedUrl, {
+            method: 'PUT',
+            body: option.image_file,
+            headers: {
+              'Content-Type': option.image_file.type,
+            },
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload image to storage');
+          }
+          
           return {
             ...option,
-            image_url: data.publicUrl,
-            image_file: undefined,
+            image_url: publicUrl,
           };
         }
         return option;
