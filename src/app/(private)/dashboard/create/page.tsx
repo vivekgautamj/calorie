@@ -234,6 +234,7 @@ const CreatePage = () => {
           show_results: showResults,
           cta_text: ctaText,
           cta_url: ctaUrl,
+          expires_at: new Date(Date.now() + parseInt(expireAfter) * 24 * 60 * 60 * 1000).toISOString(),
         }),
       });
       const data = await response.json();

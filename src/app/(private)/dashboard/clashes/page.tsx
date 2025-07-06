@@ -6,27 +6,43 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const ClashesPage = () => {
   const [clashes, setClashes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const fetchClashes = async () => {
+    fetch("/api/clashes")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setClashes(data.clashes);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+  
   useEffect(() => {
-    const fetchClashes = async () => {
-      fetch("/api/clashes")
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setClashes(data.clashes);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
+    
     fetchClashes();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/clashes/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setClashes(clashes.filter((clash) => clash.id !== id));
+      toast.success("Clash deleted");
+      fetchClashes();
+    } else {
+      toast.error("Failed to delete clash");
+    }
+  };
 
   return (
     <div className="space-y-6">

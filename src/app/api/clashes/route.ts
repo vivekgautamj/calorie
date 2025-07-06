@@ -139,6 +139,7 @@ export async function POST(request: NextRequest) {
       cta_text: validatedData.cta_text,
       cta_url: validatedData.cta_url,
       expires_at: validatedData.expires_at ,
+      slug: nanoid(5),
     }
 
     // Create the clash

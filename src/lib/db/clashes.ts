@@ -36,6 +36,7 @@ export interface CreateClashInput {
   cta_text?: string
   cta_url?: string
   expires_at?: string
+  slug?: string
 }
 
 // Input type for updating clashes
