@@ -66,7 +66,6 @@ const ViewClashPage = () => {
             Back to Dashboard
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">View Clash</h1>
       </div>
 
       {loading && (
@@ -94,6 +93,31 @@ const ViewClashPage = () => {
                 <div className="flex flex-row gap-2">
                     <Button variant="outline">Edit</Button>
                     <Button variant="destructive" onClick={() => setOpen(true)}>Delete</Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://clsh.app/vote/${clash.slug || clash.id}`);
+                        toast.success("Link copied!");
+                      }}
+                    >
+                      Copy Link
+                    </Button>
+                    {typeof window !== "undefined" && "share" in navigator && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.share({
+                            title: clash.title,
+                            text: "Vote on this clash!",
+                            url: `https://clsh.app/vote/${clash.slug || clash.id}`,
+                          });
+                        }}
+                      >
+                        Share
+                      </Button>
+                    )}
                 </div>
                 <div className="flex flex-row gap-2">
                     CTA Text: {clash.cta_text}

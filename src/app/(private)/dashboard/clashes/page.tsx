@@ -123,6 +123,32 @@ const ClashesPage = () => {
                   <Button variant="destructive" onClick={() => handleDelete(clash.id)}>
                     <Trash className="w-4 h-4" />
                     </Button>
+                  {/* Share/Copy Voting Link */}
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://clsh.app/vote/${clash.slug || clash.id}`);
+                      toast.success("Link copied!");
+                    }}
+                  >
+                    Copy Link
+                  </Button>
+                  {typeof window !== "undefined" && "share" in navigator && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.share({
+                          title: clash.title,
+                          text: "Vote on this clash!",
+                          url: `https://clsh.app/vote/${clash.slug || clash.id}`,
+                        });
+                      }}
+                    >
+                      Share
+                    </Button>
+                  )}
                 </div>
                   </div>
                 ))}
