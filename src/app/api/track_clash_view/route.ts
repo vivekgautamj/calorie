@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { clash_id, device_fingerprint, user_agent } = await req.json();
+  const { clash_id, device_fingerprint, user_agent, referrer } = await req.json();
 
   const { data, error } = await supabase
     .from("track_clash_views")
@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
       clash_id,
       device_fingerprint,
       user_agent,
+      referrer: referrer,
+      
     });
 
   if (error) {

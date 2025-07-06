@@ -1,18 +1,25 @@
-import { Plus, BarChart3, Users } from "lucide-react";
+"use client";
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 
-const DashboardPage = async () => {
-    const session = await auth();
+const DashboardPage =  () => {
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
     
-    // Check if user is authenticated
-    if (!session?.user) {
-        redirect('/login');
-    }
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            setLoading(true);
+            const res = await fetch("/api/analytics");
+            const data = await res.json();
+            setAnalytics(data);
+            setLoading(false);
+        };
+        fetchAnalytics();
+    }, []);
     
     return (
         <div className="space-y-6">
@@ -49,8 +56,32 @@ const DashboardPage = async () => {
                         </div>
                     </CardContent>
                 </Card>
-
-                
+                {/* Analytics Summary */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Analytics Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? (
+                            <div>Loading analytics...</div>
+                        ) : analytics ? (
+                            <div className="space-y-2">
+                                <div>Total Clashes Created: {analytics.totalClashesCreated}</div>
+                                <div>Total Votes: {analytics.totalVotes}</div>
+                                {analytics.topClash && (
+                                    <div>
+                                        <div className="font-semibold mt-2">Top Clash:</div>
+                                        <div>Title: {analytics.topClash.title}</div>
+                                        <div>Votes: {analytics.topClash.votes}</div>
+                                        <div>Views: {analytics.topClash.views}</div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div>No analytics data available.</div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

@@ -1,8 +1,8 @@
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { auth } from "../../../auth";
 import DashboardHeader from "@/components/dashboard-header";
 
-const Layout = async ({ children }: { children: React.ReactNode }) => {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
 
     if (!session?.user) {
@@ -17,6 +17,4 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
             </div>
         </div>
     );
-};
-
-export default Layout;
+}

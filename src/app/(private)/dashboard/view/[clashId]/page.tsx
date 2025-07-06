@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -23,21 +22,23 @@ const ViewClashPage = () => {
   const { clashId } = useParams();
   const router = useRouter();
   const [clash, setClash] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  console.log(clashId);
-
   useEffect(() => {
-    const fetchClash = async () => {
-      const response = await fetch(`/api/clashes/${clashId}`);
-      const data = await response.json();
-      console.log(data);
-      setClash(data);
+    const fetchClashAndAnalytics = async () => {
+      setLoading(true);
+      const clashRes = await fetch(`/api/clashes/${clashId}`);
+      const clashData = await clashRes.json();
+      setClash(clashData);
+      const analyticsRes = await fetch(`/api/clashes/${clashId}/analytics`);
+      const analyticsData = await analyticsRes.json();
+      setAnalytics(analyticsData);
       setLoading(false);
     };
-    fetchClash();
+    fetchClashAndAnalytics();
   }, [clashId]);
 
   const handleDelete = async () => {
@@ -54,6 +55,24 @@ const ViewClashPage = () => {
     setDeleting(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="w-4 h-4 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!clash) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="text-sm text-muted-foreground">
+          Clash not found or deleted
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -67,103 +86,130 @@ const ViewClashPage = () => {
           </Link>
         </Button>
       </div>
-
-      {loading && (
-        <div className="flex justify-center items-center h-full">
-          <Loader2 className="w-4 h-4 animate-spin" />
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold">{clash.title}</h1>
+        <p className="text-sm text-muted-foreground">{clash.description}</p>
+        <div className="flex flex-row gap-2">
+          <Badge variant="outline">{clash.status}</Badge>
+          <Badge variant="outline">
+            {clash.expires_at
+              ? new Date(clash.expires_at).toLocaleString()
+              : "-"}
+          </Badge>
         </div>
-      )}
-
-      {!loading && !clash ? (
-        <div className="flex justify-center items-center h-full">
-          <p className="text-sm text-muted-foreground">
-            Clash not found or deleted
-          </p>
+        <div className="flex flex-row gap-2">
+          <Button variant="outline">Edit</Button>
+          <Button variant="destructive" onClick={() => setOpen(true)}>
+            Delete
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `https://clsh.app/vote/${clash.slug || clash.id}`
+              );
+              toast.success("Link copied!");
+            }}
+          >
+            Copy Link
+          </Button>
+          {typeof window !== "undefined" && "share" in navigator && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                navigator.share({
+                  title: clash.title,
+                  text: "Vote on this clash!",
+                  url: `https://clsh.app/vote/${clash.slug || clash.id}`,
+                });
+              }}
+            >
+              Share
+            </Button>
+          )}
         </div>
-      ) : (
-        <>
-        {clash && (
-            <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold">{clash.title}</h1>
-                <p className="text-sm text-muted-foreground">{clash.description}</p>
-                <div className="flex flex-row gap-2">
-                    <Badge variant="outline">{clash.status}</Badge>
-                    <Badge variant="outline">{clash.expires_at ? new Date(clash.expires_at).toLocaleString() : "-"}</Badge>
-                </div>
-                <div className="flex flex-row gap-2">
-                    <Button variant="outline">Edit</Button>
-                    <Button variant="destructive" onClick={() => setOpen(true)}>Delete</Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        navigator.clipboard.writeText(`https://clsh.app/vote/${clash.slug || clash.id}`);
-                        toast.success("Link copied!");
-                      }}
-                    >
-                      Copy Link
-                    </Button>
-                    {typeof window !== "undefined" && "share" in navigator && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          navigator.share({
-                            title: clash.title,
-                            text: "Vote on this clash!",
-                            url: `https://clsh.app/vote/${clash.slug || clash.id}`,
-                          });
-                        }}
-                      >
-                        Share
-                      </Button>
-                    )}
-                </div>
-                <div className="flex flex-row gap-2">
-                    CTA Text: {clash.cta_text}
-                </div>
-                <div className="flex flex-row gap-2">
-                    CTA URL: {clash.cta_url}
-                </div>
-                <div className="flex flex-row gap-2">
-                    {clash.options.map((option: any, idx: number) => (
-                        <div className="flex flex-row gap-2" key={idx}>
-                            <Image src={option.image_url} alt={option.text} width={100} height={100} />
-                            <p className="text-sm font-medium">{option.text}</p>
-                        </div>
-                    ))}
-                </div>
-                <div className="flex flex-row gap-2">
-                    Total Views: {clash.total_views}
-                </div>
-                <div className="flex flex-row gap-2">
-                    Total Votes: {clash.total_votes}
-                </div>
-                <div className="flex flex-row gap-2">
-                    trends over time and date :
-                    <LineChart className="w-4 h-4"/>
-                </div>
-               
+        <div className="flex flex-row gap-2">CTA Text: {clash.cta_text}</div>
+        <div className="flex flex-row gap-2">CTA URL: {clash.cta_url}</div>
+        <div className="flex flex-row gap-2">
+          {clash.options.map((option: any, idx: number) => (
+            <div className="flex flex-row gap-2" key={idx}>
+              <Image
+                src={option.image_url}
+                alt={option.text}
+                width={100}
+                height={100}
+              />
+              <p className="text-sm font-medium">{option.text}</p>
             </div>
-        )
-
-        }
-            <AlertDialog open={open} onOpenChange={setOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. All analytics and everything related to this <u className=" text-destructive">clash will be deleted</u>.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="text-white bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </>
-      )}
+          ))}
+        </div>
+        {/* Poll Results */}
+        {analytics && (
+          <>
+            {Array.isArray(analytics.winningOption) ? (
+              <div>
+                Draw between:{" "}
+                {analytics.winningOption
+                  .map((idx: number) => clash.options[idx].text)
+                  .join(" & ")}
+              </div>
+            ) : (
+              <div>Winner: {clash.options[analytics.winningOption].title}</div>
+            )}
+          </>
+        )}
+        {/* Detailed Analytics */}
+        {analytics && (
+          <div className="mt-6 space-y-2">
+            <div>Total Views: {analytics.totalViews}</div>
+            <div>Unique Views: {analytics.uniqueViews}</div>
+            <div>Total Votes: {analytics.totalVotes}</div>
+            <div>Top Referrers:</div>
+            <ul className="list-disc ml-6">
+              {analytics?.topReferrers?.map((ref: any) => (
+                <li key={ref.referrer}>
+                  {ref.referrer} ({ref.count})
+                </li>
+              ))}
+            </ul>
+            <div>Votes Over Time:</div>
+            <ul className="list-disc ml-6">
+              {analytics?.votesTimeSeries?.map((v: any) => (
+                <li key={v.date}>
+                  {v.date}: {v.votes} votes
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. All analytics and everything related
+              to this <u className=" text-destructive">clash will be deleted</u>
+              .
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="text-white bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
