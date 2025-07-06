@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -98,6 +98,16 @@ const ClashesPage = () => {
                         </div>
                       ))}
                     </div>
+                    <div className="flex  gap-2">
+                  <p className="text-sm font-medium">Actions:</p>
+                  <Button onClick={() => router.push(`/dashboard/view/${clash.id}`)}>View</Button>
+                  <Button variant="outline" onClick={() => router.push(`/dashboard/edit/${clash.id}`)}>
+                    <Pencil className="w-4 h-4" />
+                    </Button>
+                  <Button variant="destructive" onClick={() => handleDelete(clash.id)}>
+                    <Trash className="w-4 h-4" />
+                    </Button>
+                </div>
                   </div>
                 ))}
                 {clashes.length === 0 && (
@@ -113,12 +123,9 @@ const ClashesPage = () => {
                     </div>
                   </>
                 )}
+                
               </div>
-              <div className="flex flex-col gap-2">
-                Actions :<Button>View Clash</Button>
-                <Button>Edit Clash</Button>
-                <Button>Delete Clash</Button>
-              </div>
+              
             </>
           )}
         </CardContent>

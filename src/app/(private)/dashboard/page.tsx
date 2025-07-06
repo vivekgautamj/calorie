@@ -22,12 +22,7 @@ const DashboardPage = async () => {
                     <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
                     <p className="text-muted-foreground">Manage your thumbnail AB tests</p>
                 </div>
-                <Link href="/dashboard/create">
-                    <Button>
-                        <Plus className="w-4 h-4" />
-                        New Test
-                    </Button>
-                </Link>
+                
             </div>
            
             {/* Quick Actions */}
@@ -55,48 +50,7 @@ const DashboardPage = async () => {
                     </CardContent>
                 </Card>
 
-                {/* User Info Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profile</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {/* User Avatar */}
-                            {session.user.image && (
-                                <div className="flex">
-                                    <div className="relative w-20 h-20 rounded-full overflow-hidden">
-                                        <Image
-                                            src={session.user.image}
-                                            alt={session.user.name || "User avatar"}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            
-                            <div className="space-y-2">
-                                <div>
-                                    <p className="text-sm font-medium">Name:</p>
-                                    <p className="text-muted-foreground">{session.user.name}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">Email:</p>
-                                    <p className="text-muted-foreground">{session.user.email}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">Auth.js ID:</p>
-                                    <p className="text-muted-foreground font-mono text-xs">{session.user.id}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">User ID:</p>
-                                    <p className="text-muted-foreground font-mono text-xs">{(session.user as any).userId || "Not available"}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                
             </div>
         </div>
     );
