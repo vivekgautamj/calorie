@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getFullUrl } from "@/lib/config";
+import BackButton from "@/components/back-button";
 
 interface ClashOption {
   id: string;
@@ -111,15 +112,18 @@ const ViewClashPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          className="w-fit bg-blue-50 text-blue-600 hover:bg-blue-100"
-          asChild
-        >
-          <Link href="/dashboard">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <BackButton href="/dashboard/clashes" />
+        <div className="hidden md:block">
+          <Button
+            className="w-fit bg-blue-50 text-blue-600 hover:bg-blue-100"
+            asChild
+          >
+            <Link href="/dashboard/clashes">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Clashes
+            </Link>
+          </Button>
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">{clash.title}</h1>

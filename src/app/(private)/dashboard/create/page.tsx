@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ClashForm, ClashOption } from "@/components/ClashForm";
+import BackButton from "@/components/back-button";
 
 interface ClashFormValues {
   title: string;
@@ -73,14 +74,20 @@ const CreatePage = () => {
         throw new Error(data.error || "Failed to create clash");
       }
       toast.success("Clash created successfully");
-      router.push("/dashboard");
+      router.push("/dashboard/clashes");
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to create clash");
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto pb-24">
+      <div>
+        <div className="flex items-center gap-4 mb-4">
+          <BackButton href="/dashboard/clashes" />
+        </div>
+        <h1 className="text-xl font-semibold text-foreground">Create New Clash</h1>
+      </div>
       <ClashForm mode="create" onSubmit={handleCreateClash} />
     </div>
   );

@@ -92,10 +92,44 @@ function OptionImageUpload({
       <div
         className="flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/30 bg-muted/30 rounded-lg p-6 cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
-        style={{ minHeight: 150 }}
+        style={{ minHeight: 180, maxHeight: 240 }}
       >
         {previewUrl ? (
-          <Image src={previewUrl} alt="Preview" className="h-full w-full mb-2 rounded" width={128} height={128} />
+          <div className="w-full h-full flex flex-col items-center justify-center relative">
+            <Image 
+              src={previewUrl} 
+              alt="Preview" 
+              className="max-w-full max-h-48 object-contain rounded" 
+              width={300} 
+              height={300} 
+            />
+            <div className="absolute top-2 right-2 flex gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="h-6 w-6 p-0 bg-white/90 hover:bg-white"
+              >
+                <ImageIcon className="w-3 h-3" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFileChange(undefined);
+                }}
+                className="h-6 w-6 p-0 bg-red-500/90 hover:bg-red-600 text-white"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
             <ImageIcon className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -214,13 +248,11 @@ export const ClashForm: React.FC<ClashFormProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{mode === "edit" ? "Edit Clash" : "Create Clash"}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Card className="border-none shadow-none px-0">
+      
+      <CardContent className="p-2">
         {/* Title */}
-        <div className="mb-4">
+        <div className="my-4 flex flex-col gap-2">
           <Label htmlFor="title">Title</Label>
           <Input
             id="title"
@@ -230,7 +262,7 @@ export const ClashForm: React.FC<ClashFormProps> = ({
           />
         </div>
         {/* Description */}
-        <div className="mb-4">
+        <div className="my-4 flex flex-col gap-2">
           <Label htmlFor="description">Description (optional)</Label>
           <Input
             id="description"
@@ -240,52 +272,58 @@ export const ClashForm: React.FC<ClashFormProps> = ({
           />
         </div>
         {/* Options */}
-        <div className="mb-4">
+        <div className="my-4 flex flex-col gap-2">
           <Label>Options</Label>
-          {options.map((option, index) => (
-            <Card key={option.id} className="p-4 mb-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Input
-                  placeholder={`Enter option ${index + 1} text`}
-                  value={option.text}
-                  onChange={(e) => handleOptionChange(index, "text", e.target.value)}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {options.map((option, index) => (
+              <Card key={option.id} className="border-none shadow-none bg-gray-50">
+                <div className="flex flex-col md:flex-row items-start gap-2 mb-2">
+                  <Input
+                    placeholder={`Enter option ${index + 1} text`}
+                    value={option.text}
+                    onChange={(e) => handleOptionChange(index, "text", e.target.value)}
+                    disabled={isLoading || externalLoading}
+                    className="flex-1"
+                  />
+                  {options.length > 2 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => removeOption(index)}
+                      disabled={isLoading || externalLoading}
+                      className="md:flex-shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <OptionImageUpload
+                  value={option.image_url}
+                  file={option.image_file}
+                  onFileChange={(file) => handleOptionChange(index, "image_file", file)}
                   disabled={isLoading || externalLoading}
                 />
-                {options.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => removeOption(index)}
-                    disabled={isLoading || externalLoading}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-              <OptionImageUpload
-                value={option.image_url}
-                file={option.image_file}
-                onFileChange={(file) => handleOptionChange(index, "image_file", file)}
-                disabled={isLoading || externalLoading}
-              />
-            </Card>
-          ))}
-          <Button
+              </Card>
+            ))}
+          </div>
+          {/* <Button
             type="button"
             onClick={() => setOptions([...options, { id: `option-${options.length + 1}`, text: "" }])}
             disabled={isLoading || externalLoading}
+            className="w-fit"
           >
             Add Option
-          </Button>
+          </Button> */}
         </div>
         {/* CTA */}
         <div className="mb-4 flex items-center gap-2">
+        <Label>Show CTA</Label>
           <Switch checked={showCta} onCheckedChange={setShowCta} />
-          <Label>Show CTA</Label>
+          
         </div>
         {showCta && (
-          <div className="mb-4 flex gap-2">
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
             <Input
               placeholder="CTA Text"
               value={ctaText}
@@ -302,11 +340,12 @@ export const ClashForm: React.FC<ClashFormProps> = ({
         )}
         {/* Show Results */}
         <div className="mb-4 flex items-center gap-2">
+        <Label>Show Results</Label>
           <Switch checked={showResults} onCheckedChange={setShowResults} />
-          <Label>Show Results</Label>
+         
         </div>
         {/* Expiry */}
-        <div className="mb-4">
+        <div className="my-4 flex flex gap-4">
           <Label>Expire After (days)</Label>
           <Select value={expireAfter} onValueChange={setExpireAfter} disabled={isLoading || externalLoading}>
             <SelectTrigger>
@@ -321,18 +360,38 @@ export const ClashForm: React.FC<ClashFormProps> = ({
           </Select>
         </div>
         {error && <div className="text-destructive mb-2">{error}</div>}
-        <Button
-          className="w-full"
-          onClick={handleSubmit}
-          disabled={isLoading || externalLoading}
-        >
-          {isLoading || externalLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {mode === "edit" ? "Saving..." : "Creating..."}
-            </>
-          ) : mode === "edit" ? "Save Changes" : "Create Clash"}
-        </Button>
+        
+        {/* Sticky button container for mobile */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={isLoading || externalLoading}
+          >
+            {isLoading || externalLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {mode === "edit" ? "Saving..." : "Creating..."}
+              </>
+            ) : mode === "edit" ? "Save Changes" : "Create Clash"}
+          </Button>
+        </div>
+        
+        {/* Desktop button */}
+        <div className="hidden md:block">
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={isLoading || externalLoading}
+          >
+            {isLoading || externalLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {mode === "edit" ? "Saving..." : "Creating..."}
+              </>
+            ) : mode === "edit" ? "Save Changes" : "Create Clash"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { ClashForm, ClashOption } from "@/components/ClashForm";
+import BackButton from "@/components/back-button";
 
 interface ClashFormValues {
   title: string;
@@ -117,14 +118,34 @@ const EditClashPage = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-40">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading clash...</p>
+        </div>
+      </div>
+    );
   }
   if (!clash) {
-    return <div className="flex justify-center items-center h-40">Clash not found</div>;
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="text-center">
+          <p className="text-gray-600">Clash not found</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="max-w-4xl lg:mx-auto pb-24">
+      <div>
+        <div className="flex items-center gap-4 mb-4">
+          <BackButton href="/dashboard/clashes" />
+        </div>
+        <h1 className="text-xl font-semibold text-foreground">Edit Clash</h1>
+       
+      </div>
       <ClashForm
         mode="edit"
         initialValues={{

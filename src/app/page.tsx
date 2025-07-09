@@ -4,12 +4,15 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Home() {
   const { data: session, status } = useSession();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      <Navbar />
       {/* Header */}
       <div className="container mx-auto px-6 py-8">
         <div className="text-center mb-16">
@@ -121,6 +124,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

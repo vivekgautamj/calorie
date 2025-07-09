@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function SignIn() {
     const { data: session } = useSession();
@@ -14,7 +16,9 @@ export default function SignIn() {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+        <Navbar />
+        <div className="flex items-center justify-center p-6 min-h-[calc(100vh-200px)]">
           <div className="max-w-md w-full">
               {/* Header */}
               <div className="text-center mb-8">
@@ -84,6 +88,8 @@ export default function SignIn() {
                   </p>
               </div>
           </div>
+        </div>
+        <Footer />
       </div>
     );
 }
