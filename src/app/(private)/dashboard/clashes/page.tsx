@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface Option {
-  text: string;
+  title: string;
   image_url: string;
 }
 
@@ -182,6 +182,9 @@ const ClashesPage = () => {
               <div className="text-center py-12 text-gray-400">
                 <div className="text-lg font-medium mb-2">No clashes found</div>
                 <p className="text-sm">Create your first clash to get started</p>
+                <Button   className="mt-4" size="sm" onClick={() => router.push("/dashboard/create")}>
+                  Create Clash
+                </Button>
               </div>
             ) : (
               sorted.map((clash) => (
@@ -216,7 +219,7 @@ const ClashesPage = () => {
                     <div className="ml-6 flex-shrink-0">
                       <Image
                         src={clash.options[0].image_url}
-                        alt={clash.options[0].text || "thumbnail"}
+                        alt={clash.options[0].title || "thumbnail"}
                         width={120}
                         height={90}
                         className="rounded-lg object-cover w-32 h-24 bg-gray-100 border"

@@ -92,9 +92,9 @@ const EditClashPage = () => {
         body: JSON.stringify({
           title: values.title.trim(),
           description: values.description.trim(),
-          options: uploadedOptions.map(({ id, text, image_url }) => ({
+          options: uploadedOptions.map(({ id, title, image_url }) => ({
             id,
-            text: text.trim(),
+            title: title.trim(),
             image_url: image_url || undefined,
           })),
           show_cta: values.showCta,
@@ -172,7 +172,7 @@ const EditClashPage = () => {
                 description: clash.description,
                 options: clash.options.map((opt) => ({
                   ...opt,
-                  text: opt.text ?? opt.title ?? ""
+                  title: opt.title ?? ""
                 })),
                 ctaText: clash.cta_text,
                 ctaUrl: clash.cta_url,

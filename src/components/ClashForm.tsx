@@ -16,7 +16,7 @@ import {
 
 export interface ClashOption {
   id: string;
-  text: string;
+  title: string;
   image_url?: string;
   image_file?: File;
 }
@@ -166,8 +166,8 @@ export const ClashForm: React.FC<ClashFormProps> = ({
     initialValues.options && initialValues.options.length > 0
       ? initialValues.options
       : [
-          { id: "option-1", text: "" },
-          { id: "option-2", text: "" },
+          { id: "option-1", title: "" },
+          { id: "option-2", title: "" },
         ]
   );
   const [ctaText, setCtaText] = useState(initialValues.ctaText || "");
@@ -180,7 +180,7 @@ export const ClashForm: React.FC<ClashFormProps> = ({
 
   const handleOptionChange = useCallback((
     index: number,
-    field: "text" | "image_url" | "image_file",
+    field: "title" | "image_url" | "image_file",
     value: string | File | undefined
   ) => {
     setOptions(prevOptions => {
@@ -204,8 +204,8 @@ export const ClashForm: React.FC<ClashFormProps> = ({
       setError("Title is required");
       return false;
     }
-    if (options.some((option) => !option.text.trim())) {
-      setError("All options must have text");
+    if (options.some((option) => !option.title.trim())) {
+      setError("All options must have a title");
       return false;
     }
     if (options.length < 2) {
@@ -281,8 +281,8 @@ export const ClashForm: React.FC<ClashFormProps> = ({
                 <div className="flex flex-col md:flex-row items-start gap-2 mb-2">
                   <Input
                     placeholder={`Enter option ${index + 1} text`}
-                    value={option.text}
-                    onChange={(e) => handleOptionChange(index, "text", e.target.value)}
+                    value={option.title}
+                    onChange={(e) => handleOptionChange(index, "title", e.target.value)}
                     disabled={isLoading || externalLoading}
                     className="flex-1"
                   />

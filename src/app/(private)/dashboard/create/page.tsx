@@ -56,9 +56,9 @@ const CreatePage = () => {
         body: JSON.stringify({
           title: values.title.trim(),
           description: values.description.trim(),
-          options: uploadedOptions.map(({ id, text, image_url }) => ({
+          options: uploadedOptions.map(({ id, title, image_url }) => ({
             id,
-            text: text.trim(),
+            title: title.trim(),
             image_url: image_url || undefined,
           })),
           status: "active",

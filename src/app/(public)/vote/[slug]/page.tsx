@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, ReactNode } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +11,8 @@ import { Loader2, Copy, Share2, Home, CheckCircle } from "lucide-react";
 import { TimeRemaining } from "@/components/TimeRemaining";
 
 interface ClashOption {
+  title: string;
   id: string;
-  text: string;
   image_url: string;
 }
 
@@ -170,34 +170,47 @@ const VotePage = () => {
                 key={idx} 
                 className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
                   selectedOption === idx && submitting ? 'ring-2 ring-blue-500' : ''
-                }`}
+                } flex flex-col items-center justify-center min-h-56`}
                 onClick={() => !submitting && handleVote(idx)}
               >
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40">
-                      <Image
-                        src={option.image_url}
-                        alt={option.text}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
+                <CardContent className="p-6 flex flex-col items-center justify-center h-full w-full">
+                  <div className="flex flex-col items-center text-center space-y-4 w-full">
+                    {/* A/B Badge */}
+                    <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg my-4 ${idx === 0 ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'}`}
+                      style={{ margin: '0 auto' }}>
+                      {idx === 0 ? 'A' : 'B'}
+
+                     
+
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold text-blue-600">
-                        {idx === 0 ? 'A' : 'B'}
-                      </span>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {option.text}
-                      </h3>
-                    </div>
-                    {submitting && selectedOption === idx && (
-                      <div className="flex items-center space-x-2 text-blue-600">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span className="text-sm font-medium">Submitting vote...</span>
+                    {/* Image or Text */}
+                    {option.image_url && (
+                      <div className="relative w-60 h-60 my-4 mx-auto">
+                        <Image
+                          src={option.image_url}
+                          alt={option.title}
+                          fill
+                          className="rounded-lg object-contain"
+                        />
                       </div>
-                    )}
+                    )} 
+                    
+                      <div className="flex items-center justify-center w-full p-6 my-10 min-h-16 bg-gray-50 border border-dashed border-gray-200 rounded-lg mb-2">
+                        {/* Empty space for text-only, keeps card height consistent */}
+                        <h3 className="text-xl font-semibold text-gray-900 w-full break-words">
+                      {option.title}
+                    </h3>
+                      </div>
+                   
+                    {/* Option Text */}
+                   
                   </div>
+                  {submitting && selectedOption === idx && (
+                    <div className="flex items-center space-x-2 text-blue-600 mt-4">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-sm font-medium">Submitting vote...</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

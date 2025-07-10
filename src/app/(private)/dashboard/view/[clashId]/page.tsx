@@ -36,7 +36,6 @@ import { TimeRemaining } from "@/components/TimeRemaining";
 
 interface ClashOption {
   id: string;
-  text: string;
   title: string;
   image_url: string;
 }
@@ -240,24 +239,35 @@ const ViewClashPage = () => {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {clash.options.map((option, idx) => (
-                  <div key={option.id} className="space-y-2">
-                    <div
-                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-gray-100"
-                      onClick={() => handleImageClick(option.image_url)}
-                    >
-                      <Image
-                        src={option.image_url}
-                        alt={option.text}
-                        width={300}
-                        height={300}
-                        className="object-cover w-full h-full border border-gray-200 rounded-lg"
-                        
-                      />
-                      
+                  <div key={option.id} className="space-y-2 flex flex-col items-center justify-center min-h-56">
+                    {/* A/B Badge */}
+                    <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg mb-2 ${idx === 0 ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'}`}
+                      style={{ margin: '0 auto' }}>
+                      {idx === 0 ? 'A' : 'B'}
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-900">
-                        {option.text}
+                    {/* Image or Text */}
+                    {option.image_url ? (
+                      <div
+                        className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-gray-100 mb-2"
+                        onClick={() => handleImageClick(option.image_url)}
+                      >
+                        <Image
+                          src={option.image_url}
+                          alt={option.title}
+                          width={300}
+                          height={300}
+                          className="object-cover w-full h-full border border-gray-200 rounded-lg"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center w-full min-h-32 bg-gray-50 border border-dashed border-gray-200 rounded-lg mb-2">
+                        {/* Empty space for text-only, keeps card height consistent */}
+                      </div>
+                    )}
+                    {/* Option Text */}
+                    <div className="text-center w-full">
+                      <p className="text-sm font-medium text-gray-900 w-full break-words">
+                        {option.title}
                       </p>
                       <p className="text-xs text-gray-500">
                         {getVotePercentage(idx)}%
@@ -367,7 +377,7 @@ const ViewClashPage = () => {
                   <div key={option.id} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-900">
-                        {option.text}
+                        {option.title}
                       </span>
                       <span className="text-sm font-medium text-gray-500">
                         {percentage}%

@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { nanoid } from 'nanoid'
 
 // Clash type definition
 export interface Clash {
@@ -52,23 +53,6 @@ export interface UpdateClashInput {
   expires_at?: string
 }
 
-// Generate slug from title
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
-
-// Generate UUID
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 // Create clash
 export async function createClash(input: CreateClashInput): Promise<Clash> {
   try {
@@ -85,31 +69,14 @@ export async function createClash(input: CreateClashInput): Promise<Clash> {
       throw new Error('User ID is required')
     }
 
-    // Generate slug and check for uniqueness
-    const baseSlug = generateSlug(input.title)
-    let slug = baseSlug
-    let counter = 1
-    
-    // Check if slug already exists
-    while (true) {
-      const { data: existingClash } = await supabase
-        .from('clashes')
-        .select('id')
-        .eq('slug', slug)
-        .single()
-      
-      if (!existingClash) break
-      slug = `${baseSlug}-${counter}`
-      counter++
-    }
+    let slug = nanoid(5)
 
-    const clashId = generateUUID()
+   
     const now = new Date().toISOString()
 
     const { data, error } = await supabase
       .from('clashes')
       .insert({
-        id: clashId,
         title: input.title.trim(),
         description: input.description?.trim() || '',
         options: input.options,

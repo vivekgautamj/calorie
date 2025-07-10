@@ -14,7 +14,7 @@ const createClashSchema = z.object({
   title: z.string().min(1, 'Title is required and must be at least 1 character'),
   description: z.string().optional(),
   options: z.array(z.object({
-    text: z.string().min(1, 'Option text is required and must be at least 1 character'),
+    title: z.string().min(1, 'Option title is required and must be at least 1 character'),
     image_url: z.string().url().optional().or(z.literal('')),
   })).min(2, 'At least 2 options are required').max(4, 'Maximum 4 options allowed'),
   status: z.enum(['active', 'expired']).optional().default('active'),
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       description: validatedData.description?.trim() || '',
       options: validatedData.options.map((option, index) => ({
         id: `option-${index + 1}`,
-        title: option.text.trim(),
+        title: option.title.trim(),
         image_url: option.image_url,
       })),
       user_id: userId,
