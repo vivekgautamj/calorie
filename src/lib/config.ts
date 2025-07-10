@@ -6,7 +6,7 @@ export function getDomain(): string {
   }
   
   // In production, use the configured domain or fallback to clsh.app
-  return process.env.DOMAIN_NAME || 'https://clsh.app'
+  return process.env.DOMAIN_NAME || 'https://clash-nine-ebon.vercel.app'
 }
 
 // Helper function to get the full URL for a path
