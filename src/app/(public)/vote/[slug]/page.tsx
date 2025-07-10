@@ -3,9 +3,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Link from "next/link";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import { Loader2, Copy, Share2, Home, CheckCircle } from "lucide-react";
+import { TimeRemaining } from "@/components/TimeRemaining";
 
 interface ClashOption {
   id: string;
@@ -20,6 +23,7 @@ interface Clash {
   cta_text: string;
   cta_url: string;
   options: ClashOption[];
+  expires_at?: string | null;
   error?: string;
 }
 
@@ -29,6 +33,8 @@ const VotePage = () => {
   const [clash, setClash] = useState<Clash | null>(null);
   const [loading, setLoading] = useState(true);
   const [voted, setVoted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState("");
   const [userAgent, setUserAgent] = useState("");
 
@@ -77,118 +83,212 @@ const VotePage = () => {
     }
   }, [clash, deviceFingerprint, userAgent]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   const handleVote = async (option: number) => {
-    if (!clash) return;
-    const response = await fetch(`/api/vote/${slug}`, {
-      method: "POST",
-      body: JSON.stringify({
-        option,
-        clash_id: clash.id,
-        device_fingerprint: deviceFingerprint,
-        user_agent: userAgent,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-    if (data.error && data.error.includes("You have already voted")) {
-      toast.error(data.error);
-      setVoted(true);
-    } else {
-      toast.success("Voted successfully");
-      setVoted(true);
+    if (!clash || submitting) return;
+    
+    setSubmitting(true);
+    setSelectedOption(option);
+    
+    try {
+      const response = await fetch(`/api/vote/${slug}`, {
+        method: "POST",
+        body: JSON.stringify({
+          option,
+          clash_id: clash.id,
+          device_fingerprint: deviceFingerprint,
+          user_agent: userAgent,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      
+      if (data.error && data.error.includes("You have already voted")) {
+        toast.error(data.error);
+        setVoted(true);
+      } else {
+        toast.success("Voted successfully!");
+        setVoted(true);
+      }
+    } catch (error) {
+      toast.error("Failed to submit vote. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-lg font-medium text-gray-700">Loading voting page...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!clash) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="text-center py-8">
+            <p className="text-lg font-medium text-gray-700">Clash not found</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Vote Page</h1>
-      <div className="flex flex-row gap-2">
-        <h1 className="text-2xl font-bold">{clash.title}</h1>
-        <p className="text-sm text-muted-foreground">{clash.description}</p>
-        {clash.options.map((option: ClashOption, idx: number) => (
-          <div className="flex flex-row gap-2" key={idx}>
-            <Image
-              src={option.image_url}
-              alt={option.text}
-              width={100}
-              height={100}
-            />
-            <p className="text-sm font-medium">{option.text}</p>
-          </div>
-        ))}
-      </div>
-      {clash.options.length > 0 && !voted && (
-        <div className="flex flex-row gap-2">
-          <Button onClick={() => handleVote(0)} disabled={voted}>A</Button>
-          <Button onClick={() => handleVote(1)} disabled={voted}>B</Button>
-        </div>
-      )}
-      {voted && (
-        <div className="flex flex-col gap-4 mt-4">
-          <div className="flex flex-row gap-2 items-center">
-            <p className="text-sm font-medium">Thanks for voting!</p>
-            {clash.cta_url && (
-              <Link href={clash.cta_url} target="_blank">
-                <Button>
-                  {clash.cta_text}
-                </Button>
-              </Link>
-            )}
-            <Link href="/">
-              <Button>Go to home</Button>
-            </Link>
-          </div>
-          <div className="flex flex-col items-start gap-2">
-            <span className="text-xs text-muted-foreground">Share this voting link:</span>
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                readOnly
-                value={typeof window !== "undefined" ? window.location.href : ""}
-                className="border rounded px-2 py-1 w-64 text-xs"
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success("Link copied!");
-                }}
-              >
-                Copy Link
-              </Button>
-              {typeof window !== "undefined" && "share" in navigator && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    navigator.share({
-                      title: clash.title,
-                      text: "Vote on this clash!",
-                      url: window.location.href,
-                    });
-                  }}
-                >
-                  Share
-                </Button>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-24 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            {clash.title}
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
+            {clash.description}
+          </p>
+          {clash.expires_at && (
+            <div className="flex justify-center">
+              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                <TimeRemaining expiresAt={clash.expires_at} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
 
+        {/* Voting Options */}
+        {!voted && (
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {clash.options.map((option: ClashOption, idx: number) => (
+              <Card 
+                key={idx} 
+                className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+                  selectedOption === idx && submitting ? 'ring-2 ring-blue-500' : ''
+                }`}
+                onClick={() => !submitting && handleVote(idx)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40">
+                      <Image
+                        src={option.image_url}
+                        alt={option.text}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl font-bold text-blue-600">
+                        {idx === 0 ? 'A' : 'B'}
+                      </span>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {option.text}
+                      </h3>
+                    </div>
+                    {submitting && selectedOption === idx && (
+                      <div className="flex items-center space-x-2 text-blue-600">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span className="text-sm font-medium">Submitting vote...</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* After Voting */}
+        {voted && (
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="h-12 w-12 text-green-500" />
+              </div>
+              <CardTitle className="text-2xl text-green-700">Thanks for voting!</CardTitle>
+              <CardDescription className="text-lg">
+                Your vote has been recorded successfully.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* CTA Button */}
+              {clash.cta_url && (
+                <div className="text-center">
+                  <Link href={clash.cta_url} target="_blank">
+                    <Button size="lg" className="w-full md:w-auto">
+                      {clash.cta_text}
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Home className="h-4 w-4 mr-2" />
+                    Go to Home
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Share Section */}
+              <div className="border-t pt-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                  Share this voting link
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={typeof window !== "undefined" ? window.location.href : ""}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("Link copied to clipboard!");
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </Button>
+                  </div>
+                  
+                  {typeof window !== "undefined" && "share" in navigator && (
+                    <div className="text-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.share({
+                            title: clash.title,
+                            text: "Vote on this clash!",
+                            url: window.location.href,
+                          });
+                        }}
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

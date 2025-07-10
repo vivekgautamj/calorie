@@ -1,0 +1,42 @@
+# CLSH - Clash Voting Platform
+
+## Overview
+CLSH is a modern voting platform that allows users to create and participate in visual voting contests (clashes). Users can upload images, create voting polls, and share them with others.
+
+## Key Features
+- Create visual voting contests with custom images
+- Real-time voting with device fingerprinting to prevent duplicate votes
+- Share voting links with others
+- Analytics and insights for clash creators
+- Responsive design for all devices
+- One-time payment model for lifetime access
+
+## Pages Structure
+- Homepage: Landing page with features, pricing, and call-to-action
+- Vote pages: Dynamic voting pages for each clash (/vote/[slug])
+- Dashboard: Private area for clash creators
+- Login: Authentication page
+- About: Information about the platform
+- Pricing: One-time $20 lifetime access
+
+## Technology Stack
+- Next.js 15 with React 19
+- TypeScript
+- Tailwind CSS
+- Supabase for database
+- NextAuth for authentication
+- FingerprintJS for device identification
+
+## SEO Keywords
+- voting platform
+- visual voting
+- image voting
+- clash voting
+- online polls
+- voting contests
+- one-time payment
+- lifetime access
+- $20 lifetime
+
+## Contact
+For more information about CLSH, visit the homepage or contact support. 

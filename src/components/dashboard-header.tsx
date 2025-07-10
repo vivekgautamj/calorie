@@ -7,7 +7,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BarChart3, User, Plus, Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
   user: {
@@ -21,6 +22,15 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    if (path === "/dashboard/clashes") {
+      return pathname === "/dashboard/clashes" || pathname === "/dashboard";
+    }
+    return pathname === path;
+  };
+
   return (
     <section className=" top-0 z-20 bg-background">
       <div className="flex lg:px-40 xl:px-52 border-b border-gray-200">
@@ -40,13 +50,27 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <div style={{ position: "relative" }}>
               <ul data-orientation="horizontal" data-slot="navigation-menu-list" className="group flex-1 list-none items-center justify-center gap-1 hidden lg:flex" dir="ltr">
                 <li data-slot="navigation-menu-item" className="relative">
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button 
+                    variant={isActive("/dashboard/clashes") ? "default" : "ghost"} 
+                    size="sm" 
+                    asChild
+                    className={cn(
+                      isActive("/dashboard/clashes") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    )}
+                  >
                     <Link href="/dashboard/clashes">
                       Clashes
                     </Link>
                   </Button>
                 </li>
-                <Button variant="ghost" size="sm" asChild>
+                <Button 
+                  variant={isActive("/dashboard/create") ? "default" : "ghost"} 
+                  size="sm" 
+                  asChild
+                  className={cn(
+                    isActive("/dashboard/create") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                  )}
+                >
                   <Link href="/dashboard/create">Create</Link>
                 </Button>
                 

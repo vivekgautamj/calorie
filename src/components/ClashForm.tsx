@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,7 +62,7 @@ function OptionImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (
@@ -83,7 +83,7 @@ function OptionImageUpload({
     }
     setError("");
     onFileChange(file);
-  };
+  }, [onFileChange]);
 
   const previewUrl = file ? URL.createObjectURL(file) : value;
 
@@ -178,27 +178,28 @@ export const ClashForm: React.FC<ClashFormProps> = ({
   const [showResults, setShowResults] = useState(initialValues.showResults || false);
   const [expireAfter, setExpireAfter] = useState(initialValues.expireAfter || "1");
 
-  const handleOptionChange = (
+  const handleOptionChange = useCallback((
     index: number,
     field: "text" | "image_url" | "image_file",
     value: string | File | undefined
   ) => {
-    const newOptions = [...options];
-    newOptions[index] = { ...newOptions[index], [field]: value };
-    setOptions(newOptions);
-  };
+    setOptions(prevOptions => {
+      const newOptions = [...prevOptions];
+      newOptions[index] = { ...newOptions[index], [field]: value };
+      return newOptions;
+    });
+  }, []);
 
-  const removeOption = (index: number) => {
+  const removeOption = useCallback((index: number) => {
     if (options.length <= 2) {
       setError("Minimum 2 options required");
       return;
     }
-    const newOptions = options.filter((_, i) => i !== index);
-    setOptions(newOptions);
+    setOptions(prevOptions => prevOptions.filter((_, i) => i !== index));
     setError("");
-  };
+  }, [options.length]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     if (!title.trim()) {
       setError("Title is required");
       return false;
@@ -223,9 +224,9 @@ export const ClashForm: React.FC<ClashFormProps> = ({
     }
     setError("");
     return true;
-  };
+  }, [title, options, showCta, ctaText, ctaUrl]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!validateForm()) return;
     setIsLoading(true);
     setError("");
@@ -245,7 +246,7 @@ export const ClashForm: React.FC<ClashFormProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [title, description, options, ctaText, ctaUrl, showCta, showResults, expireAfter, validateForm, onSubmit]);
 
   return (
     <Card className="border-none shadow-none px-0">

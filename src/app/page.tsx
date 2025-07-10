@@ -4,6 +4,9 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, Star, Zap, Shield, Users, BarChart3, Share2, TrendingUp, Smartphone } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
@@ -13,117 +16,348 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <Navbar />
-      {/* Header */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Image
-              src="/logo.png"
-              alt="CLSH Logo"
-              width={60}
-              height={60}
-              className="rounded-lg"
-            />
-            <h1 className="text-6xl font-bold text-gray-900">
-              CLSH
-            </h1>
+      
+      {/* Header Section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <Image
+                src="/logo.png"
+                alt="CLSH Logo"
+                width={60}
+                height={60}
+                className="rounded-lg"
+              />
+              <h1 className="text-6xl font-bold text-gray-900">
+                CLSH
+              </h1>
+            </div>
+            <p className="text-xl text-gray-600 mb-2">
+              Create. Share. Clash.
+            </p>
+            <p className="text-lg text-gray-500">
+              AB test your ideas quickly  
+            </p>
           </div>
-          <p className="text-xl text-gray-600 mb-2">
-            Create. Share. Clash.
-          </p>
-          <p className="text-lg text-gray-500">
-            AB test your thumbnails quickly and with fun
-          </p>
-        </div>
 
-        {/* Features Section */}
-        <div className="max-w-4xl  mb-16">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold mb-2">Thumbnail A vs B</h3>
-              <p className="text-gray-600">Test which thumbnail performs better</p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">⚡</div>
-              <h3 className="text-xl font-semibold mb-2">Quick & Fast</h3>
-              <p className="text-gray-600">Get results in minutes, not days</p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-xl font-semibold mb-2">Fun Testing</h3>
-              <p className="text-gray-600">Make AB testing enjoyable and engaging</p>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            {status === "loading" ? (
-              <div className="animate-pulse">
-                <div className="h-12 bg-gray-200 rounded-lg"></div>
+          {/* Quick Features Section */}
+          <div className="flex justify-center mb-16">
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Feature 1 */}
+              <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-4xl mb-4">🚀</div>
+                <h3 className="text-xl font-semibold mb-2">Thumbnail A vs B</h3>
+                <p className="text-gray-600">Test which thumbnail performs better</p>
               </div>
-            ) : session ? (
-              // User is logged in
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Welcome back!
-                </h2>
-                <div className="flex items-center justify-center space-x-3 mb-6">
-                  {session.user?.image && (
-                    <img 
-                      src={session.user.image} 
-                      alt="Profile" 
-                      className="w-12 h-12 rounded-full"
-                    />
-                  )}
-                  <span className="text-gray-700 font-medium">
-                    {session.user?.name}
-                  </span>
+
+              {/* Feature 2 */}
+              <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-4xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold mb-2">Quick & Fast</h3>
+                <p className="text-gray-600">Get results in minutes, not days</p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-semibold mb-2">Fun Testing</h3>
+                <p className="text-gray-600">Make AB testing enjoyable and engaging</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="max-w-md mx-auto text-center mb-16">
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              {status === "loading" ? (
+                <div className="animate-pulse">
+                  <div className="h-12 bg-gray-200 rounded-lg"></div>
                 </div>
-                <p className="text-gray-600 mb-6">
-                  Ready to test your next thumbnail?
-                </p>
-                <Link 
-                  href="/dashboard"
-                  className="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
-                >
-                  Go to Dashboard
-                </Link>
-              </div>
-            ) : (
-              // User is not logged in
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Ready to Start?
-                </h2>
-                <p className="text-gray-600 mb-8">
-                  Sign in with Google to begin testing your thumbnails.
-                </p>
-                <Button 
-                        onClick={() => signIn("google" , {callbackUrl : '/dashboard'})}
-                        className="w-full h-12 text-base"
-                        variant="outline"
-                    >
-                        <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continue with Google
-                    </Button>
-              </div>
-            )}
+              ) : session ? (
+                // User is logged in
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    Welcome back!
+                  </h2>
+                  <div className="flex items-center justify-center space-x-3 mb-6">
+                    {session.user?.image && (
+                      <img 
+                        src={session.user.image} 
+                        alt="Profile" 
+                        className="w-12 h-12 rounded-full"
+                      />
+                    )}
+                    <span className="text-gray-700 font-medium">
+                      {session.user?.name}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-6">
+                    Ready to test your next thumbnail?
+                  </p>
+                  <Link 
+                    href="/dashboard"
+                    className="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
+                  >
+                    Go to Dashboard
+                  </Link>
+                </div>
+              ) : (
+                // User is not logged in
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    Ready to Start?
+                  </h2>
+                  <p className="text-gray-600 mb-8">
+                    Sign in with Google to begin testing your thumbnails.
+                  </p>
+                  <Button 
+                          onClick={() => signIn("google" , {callbackUrl : '/dashboard'})}
+                          className="w-full h-12 text-base"
+                          variant="outline"
+                      >
+                          <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24">
+                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                          Continue with Google
+                      </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Comprehensive Features Section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Everything You Need for A/B Testing
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              CLSH provides all the tools you need to create engaging visual voting contests and get real user feedback.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {/* Feature 1 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <Share2 className="h-8 w-8 text-blue-500" />
+                </div>
+                <CardTitle className="text-center">Easy Sharing</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Create a clash and share the link instantly. No account required for voters.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <Shield className="h-8 w-8 text-green-500" />
+                </div>
+                <CardTitle className="text-center">Secure Voting</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Device fingerprinting prevents duplicate votes and ensures fair results.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <BarChart3 className="h-8 w-8 text-purple-500" />
+                </div>
+                <CardTitle className="text-center">Real-time Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Track votes, engagement, and performance with detailed analytics.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 4 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <Smartphone className="h-8 w-8 text-orange-500" />
+                </div>
+                <CardTitle className="text-center">Mobile Optimized</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Perfect experience on all devices - desktop, tablet, and mobile.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 5 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <TrendingUp className="h-8 w-8 text-red-500" />
+                </div>
+                <CardTitle className="text-center">Quick Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Get voting results in minutes, not days. Make decisions faster.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 6 */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-center mb-4">
+                  <Users className="h-8 w-8 text-indigo-500" />
+                </div>
+                <CardTitle className="text-center">Community Driven</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Engage your audience with fun, interactive voting contests.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing Section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              One payment. Lifetime access. No hidden fees, no subscriptions.
+            </p>
+          </div>
+
+          <div className="flex justify-center mb-16">
+            <Card className="max-w-2xl w-full relative overflow-hidden">
+              {/* Popular Badge */}
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-bl-lg">
+                <span className="text-sm font-semibold">MOST POPULAR</span>
+              </div>
+              
+              <CardHeader className="text-center pt-8">
+                <CardTitle className="text-3xl mb-2">Lifetime Access</CardTitle>
+                <div className="flex items-baseline justify-center">
+                  <span className="text-5xl font-bold text-gray-900">$20</span>
+                  <span className="text-xl text-gray-600 ml-2">one-time</span>
+                </div>
+                <CardDescription className="text-lg">
+                  Pay once, use forever. No recurring charges.
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                {/* Features */}
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Unlimited clash creation</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Unlimited voting participation</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Advanced analytics & insights</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Device fingerprinting protection</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">All future updates included</span>
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <div className="pt-6">
+                  <Link href="/pricing" className="block">
+                    <Button size="lg" className="w-full h-12 text-lg font-semibold">
+                      Get Lifetime Access - $20
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Guarantee */}
+                <div className="text-center pt-4">
+                  <p className="text-sm text-gray-500">
+                    🔒 Secure payment • 30-day money-back guarantee
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Why Choose CLSH */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card>
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Zap className="h-8 w-8 text-blue-500" />
+                </div>
+                <CardTitle>No Subscriptions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  Pay once and use CLSH forever. No monthly fees, no hidden charges.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Shield className="h-8 w-8 text-green-500" />
+                </div>
+                <CardTitle>Risk-Free</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  30-day money-back guarantee. If you're not satisfied, we'll refund you.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Star className="h-8 w-8 text-yellow-500" />
+                </div>
+                <CardTitle>Best Value</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-center">
+                  At just $20, it's less than most monthly subscriptions cost.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );

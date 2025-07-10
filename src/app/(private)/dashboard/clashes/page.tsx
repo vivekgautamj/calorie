@@ -5,6 +5,23 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { getFullUrl } from "@/lib/config";
 import { toast } from "sonner";
+import { Edit, Trash2, Eye, Share2, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Option {
   text: string;
@@ -42,7 +59,6 @@ const SORT_OPTIONS = [
 const FILTERS = [
   { label: "Active", value: "active" },
   { label: "Expired", value: "expired" },
-  
 ];
 
 const ClashesPage = () => {
@@ -50,6 +66,8 @@ const ClashesPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("active");
   const [sort, setSort] = useState("recent");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clashToDelete, setClashToDelete] = useState<Clash | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -76,6 +94,38 @@ const ClashesPage = () => {
     if (sort === "votes") return (b.votes || 0) - (a.votes || 0);
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
+
+  const openDeleteDialog = (clash: Clash) => {
+    setClashToDelete(clash);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!clashToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/clashes/${clashToDelete.id}`, {
+        method: "DELETE",
+      });
+      
+      if (response.ok) {
+        setClashes(clashes.filter(c => c.id !== clashToDelete.id));
+        toast.success("Clash deleted successfully");
+        setDeleteDialogOpen(false);
+        setClashToDelete(null);
+      } else {
+        toast.error("Failed to delete clash");
+      }
+    } catch (error) {
+      toast.error("Failed to delete clash");
+    }
+  };
+
+  const handleShare = (clash: Clash) => {
+    const url = getFullUrl(`/vote/${clash.slug || clash.id}`);
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied to clipboard!");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,8 +187,7 @@ const ClashesPage = () => {
               sorted.map((clash) => (
                 <div
                   key={clash.id}
-                  className="flex items-center justify-between p-6 border-b last:border-b-0 group cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => router.push(`/dashboard/view/${clash.id}`)}
+                  className="flex  items-center justify-between p-6 border-b last:border-b-0 group hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -157,6 +206,12 @@ const ClashesPage = () => {
                       <span className="font-medium">{clash.votes}</span> votes
                     </div>
                   </div>
+                  
+                  <div className=" flex  flex-col gap-2 items-end">
+                    
+                  
+
+                  {/* Thumbnail */}
                   {clash.options?.[0]?.image_url && (
                     <div className="ml-6 flex-shrink-0">
                       <Image
@@ -169,12 +224,74 @@ const ClashesPage = () => {
                       />
                     </div>
                   )}
+
+                  {/* Actions */}
+                  <div className="ml-4 flex items-center gap-2">
+                    {/* View Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/view/${clash.id}`)}
+                      className="flex items-center gap-1"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="hidden sm:inline">View</span>
+                    </Button>
+
+                    {/* Dropdown Menu for More Actions */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/edit/${clash.id}`)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleShare(clash)}>
+                          <Share2 className="w-4 h-4 mr-2" />
+                          Share URL
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => openDeleteDialog(clash)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  </div>
                 </div>
               ))
             )}
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Clash</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{clashToDelete?.title}"? This action cannot be undone and will permanently remove the clash and all its voting data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete Clash
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

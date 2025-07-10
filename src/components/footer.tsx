@@ -21,6 +21,11 @@ export default function Footer() {
             <p className="text-gray-600 mb-4 max-w-md">
               Create. Share. Clash. AB test your thumbnails quickly and with fun.
             </p>
+            <div className="mb-4">
+              <p className="text-sm text-gray-500">
+                <strong>Lifetime Access:</strong> $20 one-time payment
+              </p>
+            </div>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-gray-600">
                 <span className="sr-only">Twitter</span>
@@ -44,18 +49,13 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/features" className="text-gray-600 hover:text-gray-900">
-                  Features
-                </Link>
-              </li>
-              <li>
                 <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-gray-600 hover:text-gray-900">
-                  Documentation
+                <Link href="/about" className="text-gray-600 hover:text-gray-900">
+                  About
                 </Link>
               </li>
             </ul>
@@ -69,17 +69,12 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link href="/about" className="text-gray-600 hover:text-gray-900">
-                  About
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-gray-600 hover:text-gray-900">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-                  Contact
+                <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
+                  Pricing
                 </Link>
               </li>
             </ul>
@@ -92,11 +87,11 @@ export default function Footer() {
               © 2024 CLSH. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-gray-500 hover:text-gray-900 text-sm">
-                Privacy Policy
+              <Link href="/about" className="text-gray-500 hover:text-gray-900 text-sm">
+                About
               </Link>
-              <Link href="/terms" className="text-gray-500 hover:text-gray-900 text-sm">
-                Terms of Service
+              <Link href="/pricing" className="text-gray-500 hover:text-gray-900 text-sm">
+                Pricing
               </Link>
             </div>
           </div>

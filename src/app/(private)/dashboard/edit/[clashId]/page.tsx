@@ -119,53 +119,75 @@ const EditClashPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading clash...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-40">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading clash...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
+  
   if (!clash) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="text-center">
-          <p className="text-gray-600">Clash not found</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-40">
+              <div className="text-center">
+                <p className="text-gray-600">Clash not found</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl lg:mx-auto pb-24">
-      <div>
-        <div className="flex items-center gap-4 mb-4">
-          <BackButton href="/dashboard/clashes" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <BackButton href="/dashboard/clashes" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Clash</h1>
+            <p className="text-gray-600">Update your A/B test settings</p>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <ClashForm
+              mode="edit"
+              initialValues={{
+                title: clash.title,
+                description: clash.description,
+                options: clash.options.map((opt) => ({
+                  ...opt,
+                  text: opt.text ?? opt.title ?? ""
+                })),
+                ctaText: clash.cta_text,
+                ctaUrl: clash.cta_url,
+                showCta: clash.show_cta,
+                showResults: clash.show_results,
+                expireAfter: clash.expires_at
+                  ? String(Math.max(1, Math.round((new Date(clash.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))))
+                  : "1",
+              }}
+              onSubmit={handleUpdateClash}
+              isLoading={saving}
+            />
+          </div>
         </div>
-        <h1 className="text-xl font-semibold text-foreground">Edit Clash</h1>
-       
       </div>
-      <ClashForm
-        mode="edit"
-        initialValues={{
-          title: clash.title,
-          description: clash.description,
-          options: clash.options.map((opt) => ({
-            ...opt,
-            text: opt.text ?? opt.title ?? ""
-          })),
-          ctaText: clash.cta_text,
-          ctaUrl: clash.cta_url,
-          showCta: clash.show_cta,
-          showResults: clash.show_results,
-          expireAfter: clash.expires_at
-            ? String(Math.max(1, Math.round((new Date(clash.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))))
-            : "1",
-        }}
-        onSubmit={handleUpdateClash}
-        isLoading={saving}
-      />
     </div>
   );
 };

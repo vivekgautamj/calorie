@@ -104,9 +104,9 @@ export async function GET(
     const datetime = hour.replace("T", " ") + ":00"; // YYYY-MM-DD HH:00
     votesTimeSeriesMap[datetime] = (votesTimeSeriesMap[datetime] || 0) + 1;
   });
-  const votesTimeSeries: { datetime: string; votes: number }[] = Object.entries(votesTimeSeriesMap)
-    .map(([datetime, votes]) => ({ datetime, votes }))
-    .sort((a, b) => a.datetime.localeCompare(b.datetime));
+  const votesTimeSeries: { date: string; votes: number }[] = Object.entries(votesTimeSeriesMap)
+    .map(([datetime, votes]) => ({ date: datetime, votes }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   return NextResponse.json({
     clashId,

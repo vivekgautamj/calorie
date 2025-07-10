@@ -1,7 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Loader2, BarChart3, Users, Eye, TrendingUp } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  BarChart3,
+  Users,
+  Eye,
+  TrendingUp,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -25,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getFullUrl } from "@/lib/config";
 import BackButton from "@/components/back-button";
+import { TimeRemaining } from "@/components/TimeRemaining";
 
 interface ClashOption {
   id: string;
@@ -50,6 +58,7 @@ interface Analytics {
   uniqueViews: number;
   totalVotes: number;
   winningOption: number | number[];
+  optionCounts: Record<string, number>;
   topReferrers: Array<{
     referrer: string;
     count: number;
@@ -74,13 +83,21 @@ const ViewClashPage = () => {
   useEffect(() => {
     const fetchClashAndAnalytics = async () => {
       setLoading(true);
-      const clashRes = await fetch(`/api/clashes/${clashId}`);
-      const clashData = await clashRes.json();
-      setClash(clashData);
-      const analyticsRes = await fetch(`/api/clashes/${clashId}/analytics`);
-      const analyticsData = await analyticsRes.json();
-      setAnalytics(analyticsData);
-      setLoading(false);
+      try {
+        const clashRes = await fetch(`/api/clashes/${clashId}`);
+        const clashData = await clashRes.json();
+        setClash(clashData);
+
+        const analyticsRes = await fetch(`/api/clashes/${clashId}/analytics`);
+        const analyticsData = await analyticsRes.json();
+        console.log("Analytics data:", analyticsData); // Debug log
+        setAnalytics(analyticsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load clash data");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchClashAndAnalytics();
   }, [clashId]);
@@ -115,16 +132,19 @@ const ViewClashPage = () => {
   if (!clash) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg text-muted-foreground">Clash not found or deleted</p>
+        <p className="text-lg text-muted-foreground">
+          Clash not found or deleted
+        </p>
       </div>
     );
   }
 
   const getVotePercentage = (optionIndex: number) => {
-    if (!analytics?.totalVotes) return 0;
-    // Mock calculation - replace with real data
-    const mockVotes = [65, 35]; // Example percentages
-    return mockVotes[optionIndex] || 0;
+    if (!analytics?.totalVotes || !analytics?.optionCounts) return 0;
+    const votesForOption = analytics.optionCounts[optionIndex] || 0;
+    return analytics.totalVotes > 0
+      ? Math.round((votesForOption / analytics.totalVotes) * 100)
+      : 0;
   };
 
   return (
@@ -135,15 +155,6 @@ const ViewClashPage = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <BackButton href="/dashboard/clashes" />
-              <h1 className="text-2xl font-bold text-gray-900">{clash.title}</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Link href={`/dashboard/edit/${clashId}`}>Edit</Link>
-              </Button>
-              <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
-                Delete
-              </Button>
             </div>
           </div>
         </div>
@@ -154,19 +165,27 @@ const ViewClashPage = () => {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Clash Details</h2>
-              <div className="space-y-3">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {clash.title}
+              </h2>
+              <div className="space-y-3 flex flex-col gap-2 justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Description</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Description
+                  </p>
                   <p className="text-gray-900">{clash.description}</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Badge variant={clash.status === 'active' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={
+                      clash.status === "active" ? "default" : "secondary"
+                    }
+                  >
                     {clash.status}
                   </Badge>
                   {clash.expires_at && (
                     <Badge variant="outline">
-                      Expires: {new Date(clash.expires_at).toLocaleDateString()}
+                      <TimeRemaining expiresAt={clash.expires_at} />
                     </Badge>
                   )}
                 </div>
@@ -175,7 +194,9 @@ const ViewClashPage = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      navigator.clipboard.writeText(getFullUrl(`/vote/${clash.slug || clash.id}`));
+                      navigator.clipboard.writeText(
+                        getFullUrl(`/vote/${clash.slug || clash.id}`)
+                      );
                       toast.success("Link copied!");
                     }}
                   >
@@ -196,17 +217,31 @@ const ViewClashPage = () => {
                       Share
                     </Button>
                   )}
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Link href={`/dashboard/edit/${clashId}`}>Edit</Link>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setOpen(true)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Options Images */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Options</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Options
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 {clash.options.map((option, idx) => (
                   <div key={option.id} className="space-y-2">
-                    <div 
+                    <div
                       className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity bg-gray-100"
                       onClick={() => handleImageClick(option.image_url)}
                     >
@@ -215,34 +250,18 @@ const ViewClashPage = () => {
                         alt={option.text}
                         width={300}
                         height={300}
-                        className="object-cover w-full h-full"
-                        unoptimized
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.parentElement!.innerHTML = `
-                            <div class="flex items-center justify-center w-full h-full bg-gray-200">
-                              <div class="text-center">
-                                <div class="w-12 h-12 mx-auto mb-2 bg-gray-300 rounded-full flex items-center justify-center">
-                                  <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                  </svg>
-                                </div>
-                                <p class="text-xs text-gray-500">Image not available</p>
-                              </div>
-                            </div>
-                          `;
-                        }}
+                        className="object-cover w-full h-full border border-gray-200 rounded-lg"
+                        
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-20 flex items-end">
-                        <div className="p-3 w-full bg-gradient-to-t from-black/60 to-transparent">
-                          <p className="text-white text-sm font-medium truncate">{option.text}</p>
-                        </div>
-                      </div>
+                      
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-gray-900">{option.text}</p>
-                      <p className="text-xs text-gray-500">{getVotePercentage(idx)}%</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {option.text}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {getVotePercentage(idx)}%
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -252,7 +271,7 @@ const ViewClashPage = () => {
         </div>
 
         {/* Stats Cards */}
-        {analytics && (
+        {analytics ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center">
@@ -260,8 +279,12 @@ const ViewClashPage = () => {
                   <Eye className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Views</p>
-                  <p className="text-2xl font-bold text-gray-900">{analytics.totalViews}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Views
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {analytics.totalViews}
+                  </p>
                 </div>
               </div>
             </div>
@@ -272,8 +295,12 @@ const ViewClashPage = () => {
                   <Users className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Unique Views</p>
-                  <p className="text-2xl font-bold text-gray-900">{analytics.uniqueViews}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Unique Views
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {analytics.uniqueViews}
+                  </p>
                 </div>
               </div>
             </div>
@@ -284,8 +311,12 @@ const ViewClashPage = () => {
                   <BarChart3 className="w-6 h-6 text-purple-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Votes</p>
-                  <p className="text-2xl font-bold text-gray-900">{analytics.totalVotes}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Votes
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {analytics.totalVotes}
+                  </p>
                 </div>
               </div>
             </div>
@@ -296,33 +327,54 @@ const ViewClashPage = () => {
                   <TrendingUp className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Engagement Rate</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Engagement Rate
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {analytics.totalVotes && analytics.totalViews 
-                      ? Math.round((analytics.totalVotes / analytics.totalViews) * 100)
-                      : 0}%
+                    {analytics.totalVotes && analytics.totalViews
+                      ? Math.round(
+                          (analytics.totalVotes / analytics.totalViews) * 100
+                        )
+                      : 0}
+                    %
                   </p>
                 </div>
               </div>
             </div>
           </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+            <div className="text-center text-gray-500">
+              <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm">Analytics data not available</p>
+              <p className="text-xs">
+                Analytics will appear once the clash receives views and votes
+              </p>
+            </div>
+          </div>
         )}
 
         {/* Vote Results */}
-        {analytics && (
+        {analytics ? (
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Vote Results</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              Vote Results
+            </h3>
             <div className="space-y-4">
               {clash.options.map((option, idx) => {
                 const percentage = getVotePercentage(idx);
                 return (
                   <div key={option.id} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">{option.text}</span>
-                      <span className="text-sm font-medium text-gray-500">{percentage}%</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {option.text}
+                      </span>
+                      <span className="text-sm font-medium text-gray-500">
+                        {percentage}%
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
-                      <div 
+                      <div
                         className="bg-blue-600 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${percentage}%` }}
                       ></div>
@@ -332,41 +384,84 @@ const ViewClashPage = () => {
               })}
             </div>
           </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              Vote Results
+            </h3>
+            <div className="text-center text-gray-500 py-8">
+              <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm">No votes recorded yet</p>
+              <p className="text-xs">
+                Vote results will appear here once people start voting
+              </p>
+            </div>
+          </div>
         )}
 
         {/* Vote Trend Chart */}
         {analytics?.votesTimeSeries && (
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Votes Over Time</h3>
-            <div className="h-64 flex items-end justify-between space-x-2">
-              {analytics.votesTimeSeries.map((data, idx) => {
-                const maxVotes = Math.max(...analytics.votesTimeSeries.map(d => d.votes));
-                const height = maxVotes > 0 ? (data.votes / maxVotes) * 100 : 0;
-                return (
-                  <div key={idx} className="flex-1 flex flex-col items-center">
-                    <div 
-                      className="w-full bg-blue-600 rounded-t transition-all duration-300 hover:bg-blue-700"
-                      style={{ height: `${height}%` }}
-                    ></div>
-                    <p className="text-xs text-gray-500 mt-2 text-center">
-                      {new Date(data.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              Votes Over Time
+            </h3>
+            {analytics.votesTimeSeries.length > 0 ? (
+              <div className="h-64 flex items-end justify-between space-x-2">
+                {analytics.votesTimeSeries.map((data, idx) => {
+                  const maxVotes = Math.max(
+                    ...analytics.votesTimeSeries.map((d) => d.votes)
+                  );
+                  const height =
+                    maxVotes > 0 ? (data.votes / maxVotes) * 100 : 0;
+                  return (
+                    <div
+                      key={idx}
+                      className="flex-1 flex flex-col items-center"
+                    >
+                      <div
+                        className="w-full bg-blue-600 rounded-t transition-all duration-300 hover:bg-blue-700"
+                        style={{ height: `${height}%` }}
+                        title={`${data.votes} votes on ${new Date(
+                          data.date
+                        ).toLocaleDateString()}`}
+                      ></div>
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        {new Date(data.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-sm">No votes recorded yet</p>
+                  <p className="text-xs">
+                    Votes will appear here once people start voting
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Top Referrers */}
         {analytics?.topReferrers && analytics.topReferrers.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Referrers</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              Top Referrers
+            </h3>
             <div className="space-y-3">
               {analytics.topReferrers.map((ref, idx) => (
-                <div key={ref.referrer} className="flex justify-between items-center">
+                <div
+                  key={ref.referrer}
+                  className="flex justify-between items-center"
+                >
                   <span className="text-sm text-gray-900">{ref.referrer}</span>
-                  <span className="text-sm font-medium text-gray-500">{ref.count} visits</span>
+                  <span className="text-sm font-medium text-gray-500">
+                    {ref.count} visits
+                  </span>
                 </div>
               ))}
             </div>
