@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback, ReactNode } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,6 +113,7 @@ const VotePage = () => {
         setVoted(true);
       }
     } catch (error) {
+      console.log(error);
       toast.error("Failed to submit vote. Please try again.");
     } finally {
       setSubmitting(false);

@@ -30,7 +30,7 @@ export default function AboutPage() {
               <p className="text-lg text-gray-700 leading-relaxed">
                 CLSH was created to solve a simple problem: making A/B testing and visual voting accessible, 
                 fun, and effective. We believe that the best decisions come from real user feedback, and 
-                we've built a platform that makes it easy to gather that feedback quickly and efficiently.
+                I have built a platform that makes it easy to gather that feedback quickly and efficiently.
               </p>
             </CardContent>
           </Card>

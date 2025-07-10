@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, Star, Zap, Shield, Users, BarChart3 } from "lucide-react";
+import { Check, Star, Zap, Shield } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
@@ -119,7 +118,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 text-center">
-                  30-day money-back guarantee. If you're not satisfied, we'll refund you.
+                  30-day money-back guarantee. If you are not satisfied, we will refund you.
                 </p>
               </CardContent>
             </Card>
@@ -133,7 +132,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 text-center">
-                  At just $20, it's less than most monthly subscriptions cost.
+                  At just $20, it is less than most monthly subscriptions cost.
                 </p>
               </CardContent>
             </Card>
@@ -199,7 +198,7 @@ export default function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">What's included in the $20 payment?</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">What is included in the $20 payment?</h4>
                 <p className="text-gray-600">Everything! Unlimited clash creation, voting, analytics, and all future updates. No additional costs ever.</p>
               </div>
               <div>
@@ -207,8 +206,8 @@ export default function PricingPage() {
                 <p className="text-gray-600">Yes! You can create and vote on clashes for free. The $20 payment unlocks unlimited creation and advanced features.</p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">What if I'm not satisfied?</h4>
-                <p className="text-gray-600">We offer a 30-day money-back guarantee. If you're not happy with CLSH, we'll refund your payment, no questions asked.</p>
+                <h4 className="font-semibold text-gray-900 mb-2">What if I am not satisfied?</h4>
+                <p className="text-gray-600">We offer a 30-day money-back guarantee. If you are not happy with CLSH, we will refund your payment, no questions asked.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Do I need to pay for updates?</h4>

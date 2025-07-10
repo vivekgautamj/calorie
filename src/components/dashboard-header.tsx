@@ -1,12 +1,6 @@
-"use client";
-
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import LogoutButton from "./logout-button";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BarChart3, User, Plus, Menu, X, ChevronDown } from "lucide-react";
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +14,6 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 

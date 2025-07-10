@@ -5,7 +5,6 @@ import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Check, Star, Zap, Shield, Users, BarChart3, Share2, TrendingUp, Smartphone } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
@@ -336,7 +335,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 text-center">
-                  30-day money-back guarantee. If you're not satisfied, we'll refund you.
+                  30-day money-back guarantee. If you are not satisfied, we will refund you.
                 </p>
               </CardContent>
             </Card>
@@ -350,7 +349,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 text-center">
-                  At just $20, it's less than most monthly subscriptions cost.
+                  At just $20, it is less than most monthly subscriptions cost.
                 </p>
               </CardContent>
             </Card>

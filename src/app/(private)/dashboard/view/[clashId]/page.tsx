@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Loader2,
   BarChart3,
   Users,
@@ -463,7 +462,7 @@ const ViewClashPage = () => {
               Top Referrers
             </h3>
             <div className="space-y-3">
-              {analytics.topReferrers.map((ref, idx) => (
+              {analytics.topReferrers.map((ref) => (
                 <div
                   key={ref.referrer}
                   className="flex justify-between items-center"

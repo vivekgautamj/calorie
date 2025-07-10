@@ -4,17 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Key,
-  Calendar,
-  LogOut,
-  Shield,
-  Clock,
-} from "lucide-react";
+import { User, Mail, LogOut, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import BackButton from "@/components/back-button";
 
@@ -72,7 +62,9 @@ const ProfilePage = () => {
               <BackButton href="/dashboard/clashes" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
-            <p className="text-gray-600">Manage your account settings and preferences</p>
+            <p className="text-gray-600">
+              Manage your account settings and preferences
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -96,7 +88,9 @@ const ProfilePage = () => {
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <User className="w-5 h-5 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Name</p>
+                        <p className="text-sm font-medium text-gray-700">
+                          Name
+                        </p>
                         <p className="text-gray-900 font-semibold">
                           {userInfo.name}
                         </p>
@@ -106,7 +100,9 @@ const ProfilePage = () => {
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <Mail className="w-5 h-5 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Email</p>
+                        <p className="text-sm font-medium text-gray-700">
+                          Email
+                        </p>
                         <p className="text-gray-900 font-semibold">
                           {userInfo.email}
                         </p>
@@ -150,8 +146,12 @@ const ProfilePage = () => {
                   <div className="p-4 bg-red-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-red-700">Sign Out</p>
-                        <p className="text-red-600 text-xs">Sign out of your account</p>
+                        <p className="text-sm font-medium text-red-700">
+                          Sign Out
+                        </p>
+                        <p className="text-red-600 text-xs">
+                          Sign out of your account
+                        </p>
                       </div>
                       <Button
                         variant="outline"

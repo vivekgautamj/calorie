@@ -69,7 +69,7 @@ export async function createClash(input: CreateClashInput): Promise<Clash> {
       throw new Error('User ID is required')
     }
 
-    let slug = nanoid(5)
+    const slug = nanoid(5)
 
    
     const now = new Date().toISOString()

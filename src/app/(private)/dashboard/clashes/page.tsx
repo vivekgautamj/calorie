@@ -75,7 +75,7 @@ const ClashesPage = () => {
       .then((res) => res.json())
       .then((data) => {
         // Mock votes if not present
-        const withVotes = (data.clashes || []).map((c: Clash, i: number) => ({
+        const withVotes = (data.clashes || []).map((c: Clash) => ({
           ...c,
           votes: c.votes ?? Math.floor(Math.random() * 1000),
         }));
@@ -83,6 +83,7 @@ const ClashesPage = () => {
         setLoading(false);
       })
       .catch((err) => {
+        console.log(err);
         setLoading(false);
         toast.error("Failed to load clashes");
       });
@@ -117,6 +118,7 @@ const ClashesPage = () => {
         toast.error("Failed to delete clash");
       }
     } catch (error) {
+      console.log(error);
       toast.error("Failed to delete clash");
     }
   };
@@ -281,7 +283,7 @@ const ClashesPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Clash</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{clashToDelete?.title}"? This action cannot be undone and will permanently remove the clash and all its voting data.
+              Are you sure you want to delete {clashToDelete?.title} ? This action cannot be undone and will permanently remove the clash and all its voting data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
