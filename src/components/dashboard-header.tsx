@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import LogoutButton from "@/components/logout-button";
+import LogoutButton from "./logout-button";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BarChart3, User, Plus } from "lucide-react";
+import { BarChart3, User, Plus, Menu, X, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {
   user: {
@@ -17,57 +19,61 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
   return (
-    <Card className="mb-6">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {user?.image && (
+    <section className=" top-0 z-20 bg-background">
+      <div className="flex lg:px-40 xl:px-52 border-b border-gray-200">
+        <nav aria-label="Main" data-orientation="horizontal" dir="ltr" data-slot="navigation-menu" data-viewport="true" className="group/navigation-menu relative flex max-w-max flex-1 items-center justify-center min-w-full px-4">
+          <div className="flex w-full items-center justify-between gap-12 py-4">
+            <Link href="/dashboard/clashes" className="flex items-center gap-2">
               <Image
-                src={user.image}
-                alt="Profile"
-                width={50}
-                height={50}
-                className="rounded-full"
+                src="/logo.png"
+                alt="Clash Logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
               />
-            )}
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{user?.name}</h2>
-              {user?.email && (
-                <p className="text-muted-foreground">{user.email}</p>
-              )}
-              {user?.username && (
-                <p className="text-muted-foreground">@{user.username}</p>
-              )}
+              <span className="text-lg font-semibold tracking-tighter">Clsh</span>
+            </Link>
+            
+            <div style={{ position: "relative" }}>
+              <ul data-orientation="horizontal" data-slot="navigation-menu-list" className="group flex-1 list-none items-center justify-center gap-1 hidden lg:flex" dir="ltr">
+                <li data-slot="navigation-menu-item" className="relative">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/dashboard/clashes">
+                      Clashes
+                    </Link>
+                  </Button>
+                </li>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/dashboard/create">Create</Link>
+                </Button>
+                
+              </ul>
             </div>
+            
+            <div className="hidden items-center gap-4 lg:flex cursor-pointer hover:bg-gray-100 p-2 rounded-lg" onClick={() => router.push("/dashboard/profile")}>
+              {user?.image && (
+                <Image
+                  src={user.image}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+              )}
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{user?.name || user?.username}</span>
+                
+              </div>
+             
+            </div>
+            
           </div>
           
-          {/* Navigation - Hidden on mobile due to bottom nav */}
-          <div className="hidden md:flex items-center space-x-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/clashes">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Clashes
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/create">
-                <Plus className="w-4 h-4 mr-2" />
-                Create
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/profile">
-                <User className="w-4 h-4 mr-2" />
-                Profile
-              </Link>
-            </Button>
-          </div>
-          
-          {/* Logout - Only show on desktop */}
-         
-        </div>
-      </CardContent>
-    </Card>
+        </nav>
+      </div>
+    </section>
   );
 } 

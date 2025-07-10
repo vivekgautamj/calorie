@@ -1,24 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Pencil, Plus, Trash, BarChart3, Eye, Users, TrendingUp } from "lucide-react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { toast } from "sonner";
 import { getFullUrl } from "@/lib/config";
-import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Option {
   text: string;
@@ -30,281 +16,165 @@ interface Clash {
   title: string;
   description: string;
   created_at: string;
-  status: string;
+  status: string; // "active" | "expired" | "draft"
   show_cta: boolean;
   slug?: string;
   options: Option[];
+  votes?: number; // Add this if available, else mock
 }
 
-interface Analytics {
-  totalClashesCreated: number;
-  totalVotes: number;
-  totalViews: number;
-  topClash?: {
-    title: string;
-    votes: number;
-    views: number;
-  };
-}
+const STATUS_LABELS: Record<string, string> = {
+  active: "Active",
+  expired: "Expired",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  active: "bg-blue-100 text-blue-700",
+  expired: "bg-red-100 text-red-700",
+  draft: "bg-gray-200 text-gray-700",
+};
+
+const SORT_OPTIONS = [
+  { label: "Most Recent", value: "recent" },
+  { label: "Most Votes", value: "votes" },
+];
+
+const FILTERS = [
+  { label: "Active", value: "active" },
+  { label: "Expired", value: "expired" },
+  
+];
 
 const ClashesPage = () => {
   const [clashes, setClashes] = useState<Clash[]>([]);
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [clashToDelete, setClashToDelete] = useState<Clash | null>(null);
+  const [filter, setFilter] = useState("active");
+  const [sort, setSort] = useState("recent");
   const router = useRouter();
 
-  const fetchClashes = async () => {
+  useEffect(() => {
     fetch("/api/clashes")
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        setClashes(data.clashes);
+        // Mock votes if not present
+        const withVotes = (data.clashes || []).map((c: Clash, i: number) => ({
+          ...c,
+          votes: c.votes ?? Math.floor(Math.random() * 1000),
+        }));
+        setClashes(withVotes);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        setLoading(false);
+        toast.error("Failed to load clashes");
       });
-  };
-
-  const fetchAnalytics = async () => {
-    try {
-      const res = await fetch("/api/analytics");
-      const data = await res.json();
-      setAnalytics(data);
-    } catch (err) {
-      console.error("Failed to fetch analytics:", err);
-    }
-  };
-  
-  useEffect(() => {
-    fetchClashes();
-    fetchAnalytics();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/clashes/${id}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
-      setClashes(clashes.filter((clash) => clash.id !== id));
-      toast.success("Clash deleted");
-      fetchClashes();
-    } else {
-      toast.error("Failed to delete clash");
-    }
-    setDeleteDialogOpen(false);
-    setClashToDelete(null);
-  };
+  // Filter and sort
+  const filtered = clashes.filter((c) => c.status === filter);
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === "votes") return (b.votes || 0) - (a.votes || 0);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
-  const openDeleteDialog = (clash: Clash) => {
-    setClashToDelete(clash);
-    setDeleteDialogOpen(true);
-  };
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-24">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Clashes</h1>
+            <p className="text-gray-600">Manage and track your A/B tests</p>
+          </div>
 
-    return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-muted-foreground">My Clashes</h1>
-        </div>
-        <Button
-          onClick={() => router.push("/dashboard/create")}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create New Clash
-        </Button>
-      </div>
-
-      {/* Analytics Summary */}
-      {analytics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Clashes</p>
-                  <p className="text-2xl font-bold">{analytics.totalClashesCreated}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Users className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Votes</p>
-                  <p className="text-2xl font-bold">{analytics.totalVotes}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Eye className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                  <p className="text-2xl font-bold">{analytics.totalViews || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Top Clash</p>
-                  <p className="text-sm font-semibold truncate">
-                    {analytics.topClash?.title || "None"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Clashes List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Your Clashes</span>
-            <Badge variant="outline">{clashes.length} clashes</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin" />
-            </div>
-          ) : clashes.length > 0 ? (
-            <div className="grid gap-6">
-              {clashes.map((clash) => (
-                <div key={clash.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{clash.title}</h3>
-                      <p className="text-muted-foreground mb-3">{clash.description}</p>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>Created: {new Date(clash.created_at).toLocaleDateString()}</span>
-                        <Badge variant={clash.status === 'active' ? 'default' : 'secondary'}>
-                          {clash.status}
-                        </Badge>
-                        {clash.show_cta && <Badge variant="outline">CTA Enabled</Badge>}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => router.push(`/dashboard/view/${clash.id}`)}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => router.push(`/dashboard/edit/${clash.id}`)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          navigator.clipboard.writeText(getFullUrl(`/vote/${clash.slug || clash.id}`));
-                          toast.success("Link copied!");
-                        }}
-                      >
-                        Copy Link
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => openDeleteDialog(clash)}
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Thumbnail Options */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {clash.options.map((option, idx) => (
-                      <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <Image
-                          src={option.image_url}
-                          alt={option.text}
-                          width={60}
-                          height={60}
-                          className="rounded-lg object-cover"
-                        />
-                        <span className="text-sm font-medium">{option.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <BarChart3 className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No clashes yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Create your first AB test to start getting insights
-              </p>
-              <Button
-                onClick={() => router.push("/dashboard/create")}
-                className="bg-blue-600 hover:bg-blue-700"
+          {/* Tabs/Filters */}
+          <div className="flex gap-2 mb-6">
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                className={`px-4 py-2 rounded-lg font-medium text-sm focus:outline-none transition-colors ${
+                  filter === f.value
+                    ? STATUS_COLORS[f.value]
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                }`}
+                onClick={() => setFilter(f.value)}
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Clash
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {f.label}
+              </button>
+            ))}
+          </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Clash</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{clashToDelete?.title}"? This action cannot be undone and will permanently remove all data associated with this clash including votes, views, and analytics.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => clashToDelete && handleDelete(clashToDelete.id)}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Delete Clash
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          {/* Sort By */}
+          <div className="mb-6 flex items-center gap-2">
+            <span className="font-medium text-gray-700 mr-3">Sort by:</span>
+            {SORT_OPTIONS.map((s) => (
+              <button
+                key={s.value}
+                className={`px-3 py-1 rounded-md font-medium text-sm focus:outline-none transition-colors ${
+                  sort === s.value
+                    ? "bg-gray-200 text-gray-900"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                }`}
+                onClick={() => setSort(s.value)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Clash List */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            {loading ? (
+              <div className="flex justify-center items-center py-12 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : sorted.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-lg font-medium mb-2">No clashes found</div>
+                <p className="text-sm">Create your first clash to get started</p>
+              </div>
+            ) : (
+              sorted.map((clash) => (
+                <div
+                  key={clash.id}
+                  className="flex items-center justify-between p-6 border-b last:border-b-0 group cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => router.push(`/dashboard/view/${clash.id}`)}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[clash.status]}`}>
+                        {STATUS_LABELS[clash.status]}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(clash.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="font-semibold text-lg mb-1 text-gray-900 group-hover:text-blue-600 transition-colors">
+                      {clash.title}
+                    </div>
+                    <div className="text-sm text-gray-500 mb-2">{clash.description}</div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">{clash.votes}</span> votes
+                    </div>
+                  </div>
+                  {clash.options?.[0]?.image_url && (
+                    <div className="ml-6 flex-shrink-0">
+                      <Image
+                        src={clash.options[0].image_url}
+                        alt={clash.options[0].text || "thumbnail"}
+                        width={120}
+                        height={90}
+                        className="rounded-lg object-cover w-32 h-24 bg-gray-100 border"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

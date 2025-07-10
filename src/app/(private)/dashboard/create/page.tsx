@@ -81,14 +81,24 @@ const CreatePage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-24">
-      <div>
-        <div className="flex items-center gap-4 mb-4">
-          <BackButton href="/dashboard/clashes" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <BackButton href="/dashboard/clashes" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Clash</h1>
+            <p className="text-gray-600">Set up your A/B test with two options</p>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <ClashForm mode="create" onSubmit={handleCreateClash} />
+          </div>
         </div>
-        <h1 className="text-xl font-semibold text-foreground">Create New Clash</h1>
       </div>
-      <ClashForm mode="create" onSubmit={handleCreateClash} />
     </div>
   );
 };

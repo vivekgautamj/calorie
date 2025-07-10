@@ -37,7 +37,7 @@ export default function Home() {
         </div>
 
         {/* Features Section */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-4xl  mb-16">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="text-center p-6 bg-white rounded-2xl shadow-lg">

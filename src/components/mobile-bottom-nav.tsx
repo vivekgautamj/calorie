@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Plus, User } from "lucide-react";
+import { Plus, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ClashLogo from "../../public/logo.png";
+import Image from "next/image";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -27,7 +29,7 @@ export default function MobileBottomNav() {
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <BarChart3 className="w-5 h-5 mb-1" />
+          <Image src={ClashLogo} alt="Clash Logo" className="w-5 h-5 mb-1" />
           <span className="text-xs font-medium">Clashes</span>
         </Link>
 
