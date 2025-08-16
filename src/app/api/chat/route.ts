@@ -77,7 +77,17 @@ export async function POST(request: NextRequest) {
     const isTrackingMessage = trackingPatterns.some(pattern => pattern.test(message)) ||
       message.toLowerCase().includes('add') ||
       message.toLowerCase().includes('track') ||
-      message.toLowerCase().includes('log')
+      message.toLowerCase().includes('log') ||
+      // Only count as tracking if it's a direct statement, not a question
+      (hasNutritionInfo && 
+       !message.toLowerCase().includes('?') && 
+       !message.toLowerCase().includes('have you') && 
+       !message.toLowerCase().includes('did you') &&
+       !message.toLowerCase().includes('what') &&
+       !message.toLowerCase().includes('when') &&
+       !message.toLowerCase().includes('where') &&
+       !message.toLowerCase().includes('why') &&
+       !message.toLowerCase().includes('how'))
 
     let aiResponse = ''
     let nutritionData = null

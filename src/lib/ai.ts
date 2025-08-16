@@ -30,15 +30,12 @@ export interface AIRecommendation {
 
 // Simple nutrition prompt for clean JSON
 const simpleNutritionPrompt = `
-You are a nutrition expert. Analyze the user's input and return ONLY a valid JSON object.
+SYSTEM: You are a JSON-only nutrition analyzer. You must respond with ONLY valid JSON, no other text.
 
-Rules:
-1. Return ONLY valid JSON, no other text
-2. Use standard nutritional values
-3. For Indian foods, use appropriate data
-4. Be conservative with estimates
+INPUT: Analyze the user's food/exercise input and return nutrition data.
 
-Return this exact JSON structure:
+OUTPUT FORMAT: Return ONLY this JSON structure, no other text:
+
 {
   "protein": number,
   "fat": number,
@@ -53,18 +50,23 @@ Return this exact JSON structure:
     "calories_burned": number,
     "intensity": "low|moderate|high"
   },
-  "suggestion": "string (helpful tip or recommendation)"
+  "suggestion": "string"
 }
 
-If input contains exercise, fill the exercise object. If only food, set exercise to null.
+RULES:
+- Return ONLY the JSON object above
+- No explanations, no markdown, no extra text
+- Use realistic nutritional values
+- For Indian foods, use appropriate estimates
+- If exercise mentioned, fill exercise object, otherwise set to null
 
-Common Indian food estimates:
+FOOD ESTIMATES:
 - 1 roti: 80 calories, 2.5g protein, 15g carbs, 1g fat
 - 1 cup dal: 230 calories, 18g protein, 40g carbs, 1g fat, 15g fiber
 - 1 cup rice: 200 calories, 4g protein, 45g carbs, 0.5g fat
 - 1 cup yogurt: 150 calories, 8g protein, 12g carbs, 8g fat
 
-User input: `
+USER INPUT: `
 
 const chatPrompt = `
 You are a friendly, encouraging AI nutritionist and fitness coach with expertise in Indian and global cuisine. Help users track their food and exercise with enthusiasm and helpful insights.
@@ -159,24 +161,36 @@ export async function analyzeNutrition(input: string): Promise<SimpleNutritionAn
     const response = await result.response
     const text = response.text().trim()
     
+    console.log('Raw AI response:', text)
+    
     // Try to parse the response as JSON directly
     let analysis
     try {
       analysis = JSON.parse(text)
     } catch (parseError) {
+      console.log('Direct JSON parsing failed, trying to extract JSON...')
       // If direct parsing fails, try to extract JSON
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
-        throw new Error('Invalid response format from AI')
+        console.error('No JSON found in response:', text)
+        throw new Error('Invalid response format from AI - no JSON found')
       }
-      analysis = JSON.parse(jsonMatch[0])
+      try {
+        analysis = JSON.parse(jsonMatch[0])
+      } catch (extractError) {
+        console.error('JSON extraction failed:', extractError)
+        console.error('Extracted text:', jsonMatch[0])
+        throw new Error('Invalid JSON format in AI response')
+      }
     }
     
     // Validate the response structure
     if (!analysis.protein || !analysis.fat || !analysis.carbs || !analysis.calories) {
-      throw new Error('Invalid nutrition analysis structure')
+      console.error('Invalid nutrition analysis structure:', analysis)
+      throw new Error('Invalid nutrition analysis structure - missing required fields')
     }
     
+    console.log('Parsed analysis:', analysis)
     return analysis
   } catch (error) {
     console.error('Error in analyzeNutrition:', error)

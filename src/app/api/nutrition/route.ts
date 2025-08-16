@@ -49,19 +49,16 @@ export async function GET(request: NextRequest) {
       // Get daily nutrition data
       const entries = await getNutritionEntriesByDate(userId, date)
       const totals = calculateDailyTotals(entries)
-      const goals = await getOrCreateNutritionGoals(userId)
 
       return NextResponse.json({
         entries,
         totals,
-        goals,
         date,
       })
     } else if (type === 'weekly' && startDate && endDate) {
       // Get weekly nutrition data
       const entries = await getNutritionEntriesByDateRange(userId, startDate, endDate)
       const totals = calculateDailyTotals(entries)
-      const goals = await getOrCreateNutritionGoals(userId)
 
       // Group by date
       const entriesByDate = entries.reduce((acc, entry) => {
@@ -83,7 +80,6 @@ export async function GET(request: NextRequest) {
         entries,
         dailyTotals,
         weeklyTotals: totals,
-        goals,
         startDate,
         endDate,
       })
@@ -91,7 +87,6 @@ export async function GET(request: NextRequest) {
       // Get monthly nutrition data
       const entries = await getNutritionEntriesByDateRange(userId, startDate, endDate)
       const totals = calculateDailyTotals(entries)
-      const goals = await getOrCreateNutritionGoals(userId)
 
       // Group by week
       const entriesByWeek = entries.reduce((acc, entry) => {
@@ -117,7 +112,6 @@ export async function GET(request: NextRequest) {
         entries,
         weeklyTotals,
         monthlyTotals: totals,
-        goals,
         startDate,
         endDate,
       })
@@ -126,12 +120,10 @@ export async function GET(request: NextRequest) {
       const today = new Date().toISOString().split('T')[0]
       const entries = await getNutritionEntriesByDate(userId, today)
       const totals = calculateDailyTotals(entries)
-      const goals = await getOrCreateNutritionGoals(userId)
 
       return NextResponse.json({
         entries,
         totals,
-        goals,
         date: today,
       })
     }
