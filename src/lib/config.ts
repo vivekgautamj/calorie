@@ -5,7 +5,7 @@ export function getDomain(): string {
     return process.env.DOMAIN_NAME || 'http://localhost:3000'
   }
   
-  // In production, use the configured domain or fallback to clsh.app
+  // In production, use the configured domain or fallback to calorie.app
   return process.env.DOMAIN_NAME || 'https://clash-nine-ebon.vercel.app'
 }
 

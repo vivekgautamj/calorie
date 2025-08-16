@@ -58,7 +58,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - vote-light (lightweight vote pages)
+     * - standalone routes (completely independent)
+     * - embed routes (completely independent)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/|vote-light/|\(standalone\)/|embed/).*)',
   ],
 }

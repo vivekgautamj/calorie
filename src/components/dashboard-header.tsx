@@ -38,7 +38,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 height={32}
                 className="rounded-lg"
               />
-              <span className="text-lg font-semibold tracking-tighter">Clsh</span>
+              <span className="text-lg font-semibold tracking-tighter">calorie</span>
             </Link>
             
             <div style={{ position: "relative" }}>

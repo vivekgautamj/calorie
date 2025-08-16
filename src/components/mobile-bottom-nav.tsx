@@ -2,48 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, User } from "lucide-react";
+import { MessageSquare, BarChart3, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import ClashLogo from "../../public/logo.png";
-import Image from "next/image";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    if (path === "/dashboard/clashes") {
-      return pathname === "/dashboard/clashes" || pathname === "/dashboard";
+    if (path === "/dashboard") {
+      return pathname === "/dashboard" || pathname === "/dashboard/add";
     }
     return pathname === path;
   };
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50">
       <div className="flex items-center justify-around py-2">
         <Link
-          href="/dashboard/clashes"
+          href="/dashboard"
           className={cn(
             "flex flex-col items-center py-2 px-3 rounded-lg transition-colors",
-            isActive("/dashboard/clashes")
-              ? "text-blue-600 bg-blue-50"
+            isActive("/dashboard")
+              ? "text-emerald-600 bg-emerald-50"
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <Image src={ClashLogo} alt="Clash Logo" className="w-5 h-5 mb-1" />
-          <span className="text-xs font-medium">Clashes</span>
+          <MessageSquare className="w-5 h-5 mb-1" />
+          <span className="text-xs font-medium">Add</span>
         </Link>
 
         <Link
-          href="/dashboard/create"
+          href="/dashboard/summary"
           className={cn(
             "flex flex-col items-center py-2 px-3 rounded-lg transition-colors",
-            isActive("/dashboard/create")
-              ? "text-blue-600 bg-blue-50"
+            isActive("/dashboard/summary")
+              ? "text-emerald-600 bg-emerald-50"
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <Plus className="w-5 h-5 mb-1" />
-          <span className="text-xs font-medium">Create</span>
+          <BarChart3 className="w-5 h-5 mb-1" />
+          <span className="text-xs font-medium">Summary</span>
         </Link>
 
         <Link
@@ -51,7 +49,7 @@ export default function MobileBottomNav() {
           className={cn(
             "flex flex-col items-center py-2 px-3 rounded-lg transition-colors",
             isActive("/dashboard/profile")
-              ? "text-blue-600 bg-blue-50"
+              ? "text-emerald-600 bg-emerald-50"
               : "text-gray-600 hover:text-gray-900"
           )}
         >

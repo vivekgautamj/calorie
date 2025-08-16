@@ -14,7 +14,7 @@ export default function AboutPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              About CLSH
+              About calorie
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               The modern platform for visual voting and A/B testing that makes decision-making fun and engaging.
@@ -28,7 +28,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent>
               <p className="text-lg text-gray-700 leading-relaxed">
-                CLSH was created to solve a simple problem: making A/B testing and visual voting accessible, 
+                calorie was created to solve a simple problem: making A/B testing and visual voting accessible, 
                 fun, and effective. We believe that the best decisions come from real user feedback, and 
                 I have built a platform that makes it easy to gather that feedback quickly and efficiently.
               </p>
@@ -69,7 +69,7 @@ export default function AboutPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">Why Choose CLSH</CardTitle>
+                <CardTitle className="text-2xl">Why Choose calorie</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-gray-700">
@@ -130,14 +130,14 @@ export default function AboutPage() {
               <CardHeader>
                 <CardTitle className="text-2xl">Ready to Get Started?</CardTitle>
                 <CardDescription>
-                  Join thousands of users who are already making better decisions with CLSH
+                  Join thousands of users who are already making better decisions with calorie
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link href="/">
                     <Button size="lg" className="w-full sm:w-auto">
-                      Try CLSH Free
+                      Try calorie Free
                     </Button>
                   </Link>
                   <Link href="/pricing">

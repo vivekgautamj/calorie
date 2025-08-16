@@ -11,12 +11,12 @@ export default function Footer() {
             <div className="flex items-center space-x-3 mb-4">
               <Image
                 src="/logo.png"
-                alt="CLSH Logo"
+                alt="calorie Logo"
                 width={40}
                 height={40}
                 className="rounded-lg"
               />
-              <span className="text-2xl font-bold text-gray-900">CLSH</span>
+              <span className="text-2xl font-bold text-gray-900">calorie</span>
             </div>
             <p className="text-gray-600 mb-4 max-w-md">
               Create. Share. Clash. AB test your thumbnails quickly and with fun.
@@ -84,7 +84,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-500 text-sm">
-              © 2024 CLSH. All rights reserved.
+              © 2024 calorie. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/about" className="text-gray-500 hover:text-gray-900 text-sm">

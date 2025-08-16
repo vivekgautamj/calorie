@@ -12,32 +12,33 @@ export async function createOrUpdateUser(userData: {
   country?: string
 }) {
   try {
+    console.log('Creating/updating user with data:', { email: userData.email, name: userData.name })
+    
     const { data, error } = await supabase
       .from('users')
       .upsert(
         {
-          email: userData.email,
+          user_email: userData.email,
           name: userData.name,
           image: userData.image,
           updated_at: new Date().toISOString(),
-          // Use country from Google or default to 'US'
           country: userData.country || 'US',
           timezone: 'UTC',
           subscription_status: 'free',
         },
         {
-          onConflict: 'email', // Use email as the conflict resolution key
+          onConflict: 'user_email',
         }
       )
       .select()
       .single()
 
     if (error) {
-      console.error('Error creating/updating user:', error)
+      console.error('Supabase error creating/updating user:', error)
       throw error
     }
 
-    console.log('User created/updated:', data)
+    console.log('User successfully created/updated:', { user_id: data.user_id, user_email: data.user_email })
 
     return data
   } catch (error) {

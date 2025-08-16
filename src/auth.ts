@@ -3,7 +3,7 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { createOrUpdateUser } from "@/lib/supabase"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const authConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -21,9 +21,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             image: user.image || undefined,
           })
           
-          // Store user ID in the user object for session
+          // Store Supabase user ID in the user object for session
           if (userData) {
-            ;(user as any).userId = userData.id
+            ;(user as any).supabaseUserId = userData.id
           }
           
           return true
@@ -38,15 +38,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub! // Auth.js ID
-        ;(session.user as any).userId = (token as any).userId // Supabase User ID
+        ;(session.user as any).supabaseUserId = (token as any).supabaseUserId // Supabase User ID
       }
       return session
     },
     async jwt({ token, user, trigger, session }) {
-      // When user signs in, store the userId from the user object
+      // When user signs in, store the supabaseUserId from the user object
       if (user) {
         token.sub = user.id // Auth.js ID
-        ;(token as any).userId = (user as any).userId // Supabase User ID
+        ;(token as any).supabaseUserId = (user as any).supabaseUserId // Supabase User ID
       }
       
       // Handle session updates
@@ -64,4 +64,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   debug: true,
   trustHost: true,
-})
+}
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authConfig)
+
+// Export authOptions for API routes
+export const authOptions = authConfig

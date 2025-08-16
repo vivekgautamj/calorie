@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import withPWA from 'next-pwa';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true,
+  swcMinify: true,
   serverExternalPackages: ['@auth/core'],
   images: {
     remotePatterns: [
@@ -21,4 +23,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const configWithPWA = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development'
+})(nextConfig);
+
+export default configWithPWA;

@@ -1,7 +1,7 @@
-# CLSH - Clash Voting Platform
+# calorie - Clash Voting Platform
 
 ## Overview
-CLSH is a modern voting platform that allows users to create and participate in visual voting contests (clashes). Users can upload images, create voting polls, and share them with others.
+calorie is a modern voting platform that allows users to create and participate in visual voting contests (clashes). Users can upload images, create voting polls, and share them with others.
 
 ## Key Features
 - Create visual voting contests with custom images
@@ -39,4 +39,4 @@ CLSH is a modern voting platform that allows users to create and participate in 
 - $20 lifetime
 
 ## Contact
-For more information about CLSH, visit the homepage or contact support. 
+For more information about calorie, visit the homepage or contact support. 

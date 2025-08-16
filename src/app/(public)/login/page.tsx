@@ -26,13 +26,13 @@ export default function SignIn() {
                       <div className="flex items-center justify-center space-x-3 mb-2">
                           <Image
                               src="/logo.png"
-                              alt="CLSH Logo"
+                              alt="calorie Logo"
                               width={40}
                               height={40}
                               className="rounded-lg"
                           />
                           <h1 className="text-4xl font-bold text-gray-900">
-                              CLSH
+                              calorie
                           </h1>
                       </div>
                   </Link>

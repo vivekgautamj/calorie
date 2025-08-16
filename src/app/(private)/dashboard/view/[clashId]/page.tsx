@@ -266,8 +266,13 @@ const ViewClashPage = () => {
                     {/* Option Text */}
                     <div className="text-center w-full">
                       <p className="text-sm font-medium text-gray-900 w-full break-words">
-                        {option.title}
+                        {option.title.length > 30 ? option.title.substring(0, 30) + '...' : option.title}
                       </p>
+                      {option.image_url && option.title.length > 30 && (
+                        <p className="text-xs text-gray-600 mt-1 w-full break-words">
+                          {option.title.substring(30)}
+                        </p>
+                      )}
                       <p className="text-xs text-gray-500">
                         {getVotePercentage(idx)}%
                       </p>
@@ -384,7 +389,7 @@ const ViewClashPage = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                        className="bg-make -600 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -422,6 +427,16 @@ const ViewClashPage = () => {
                   );
                   const height =
                     maxVotes > 0 ? (data.votes / maxVotes) * 100 : 0;
+                  
+                  // Parse the date string and format it properly
+                  const date = new Date(data.date);
+                  const timeLabel = date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    hour12: true
+                  });
+                  
                   return (
                     <div
                       key={idx}
@@ -430,12 +445,10 @@ const ViewClashPage = () => {
                       <div
                         className="w-full bg-blue-600 rounded-t transition-all duration-300 hover:bg-blue-700"
                         style={{ height: `${height}%` }}
-                        title={`${data.votes} votes on ${new Date(
-                          data.date
-                        ).toLocaleDateString()}`}
+                        title={`${data.votes} votes on ${timeLabel}`}
                       ></div>
-                      <p className="text-xs text-gray-500 mt-2 text-center">
-                        {new Date(data.date).toLocaleDateString()}
+                      <p className="text-xs text-gray-500 mt-2 text-center leading-tight">
+                        {timeLabel}
                       </p>
                     </div>
                   );
@@ -462,17 +475,34 @@ const ViewClashPage = () => {
               Top Referrers
             </h3>
             <div className="space-y-3">
-              {analytics.topReferrers.map((ref) => (
-                <div
-                  key={ref.referrer}
-                  className="flex justify-between items-center"
-                >
-                  <span className="text-sm text-gray-900">{ref.referrer}</span>
-                  <span className="text-sm font-medium text-gray-500">
-                    {ref.count} visits
-                  </span>
-                </div>
-              ))}
+              {analytics.topReferrers.map((ref) => {
+                // Format referrer display
+                let displayReferrer = ref.referrer;
+                if (ref.referrer === "(direct)") {
+                  displayReferrer = "Direct Traffic";
+                } else if (ref.referrer.startsWith("http")) {
+                  try {
+                    const url = new URL(ref.referrer);
+                    displayReferrer = url.hostname;
+                  } catch {
+                    displayReferrer = ref.referrer;
+                  }
+                }
+                
+                return (
+                  <div
+                    key={ref.referrer}
+                    className="flex justify-between items-center"
+                  >
+                    <span className="text-sm text-gray-900 truncate max-w-xs">
+                      {displayReferrer}
+                    </span>
+                    <span className="text-sm font-medium text-gray-500 ml-2">
+                      {ref.count} {ref.count === 1 ? 'visit' : 'visits'}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

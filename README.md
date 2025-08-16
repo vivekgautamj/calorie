@@ -50,7 +50,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 ### Domain Behavior
 
 - **Development**: Uses `DOMAIN_NAME` from environment or defaults to `http://localhost:3000`
-- **Production**: Uses `DOMAIN_NAME` from environment or defaults to `https://clsh.app`
+- **Production**: Uses `DOMAIN_NAME` from environment or defaults to `https://calorie.app`
 
 The domain is automatically configured for:
 - Share links for clashes

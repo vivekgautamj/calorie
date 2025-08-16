@@ -61,20 +61,20 @@ export async function POST(request: NextRequest) {
 
     // Generate signed upload URL (valid for 60 seconds)
     const { data, error } = await supabaseAdmin.storage
-      .from('clsh')
+      .from('calorie')
       .createSignedUploadUrl(filePath, { upsert: true })
 
     if (error || !data?.signedUrl) {
       return NextResponse.json({ error: error?.message || 'Failed to create signed URL' }, { status: 500 })
     }
 
-    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/clsh/${filePath}`
+    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/calorie/${filePath}`
 
     return NextResponse.json({
       signedUrl: data.signedUrl,
       filePath,
       publicUrl,
-      bucketName: 'clsh',
+      bucketName: 'calorie',
       expiresIn: 60
     })
   } catch (error) {
