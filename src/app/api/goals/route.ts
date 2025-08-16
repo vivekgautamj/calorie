@@ -33,12 +33,15 @@ export async function GET(request: NextRequest) {
 
     // Use the Supabase user ID
     const userId = (session.user as any).supabaseUserId
+    console.log('Getting goals for user:', userId)
 
+    // Get or create goals using upsert (prevents duplicates)
     const goals = await getOrCreateNutritionGoals(userId)
+    console.log('Goals retrieved/created:', goals.id)
 
     return NextResponse.json({ goals })
   } catch (error) {
-    console.error('Error fetching nutrition goals:', error)
+    console.error('Error in goals GET:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

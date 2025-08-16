@@ -50,6 +50,7 @@ const ProfilePage = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
 
   // Helper function to get user info with fallbacks
   const getUserInfo = () => {
@@ -117,9 +118,11 @@ const ProfilePage = () => {
   useEffect(() => {
     const loadGoals = async () => {
       try {
+        console.log('Loading goals for profile page...')
         const response = await fetch('/api/goals');
         const data = await response.json();
         if (data.goals) {
+          console.log('Goals loaded successfully for profile')
           setGoals(prev => ({ ...prev, ...data.goals }));
         }
       } catch (error) {
@@ -127,10 +130,10 @@ const ProfilePage = () => {
       }
     };
 
-    if (session?.user) {
+    if (session?.user?.email && !goals.weight) {
       loadGoals();
     }
-  }, [session]);
+  }, [session?.user?.email, goals.weight]); // Only run when user email changes and goals not loaded
 
   // Update goals when user data changes
   const updateGoals = async () => {
@@ -198,7 +201,7 @@ const ProfilePage = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              <BackButton href="/dashboard/clashes" />
+              <BackButton href="/dashboard" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
             <p className="text-gray-600">

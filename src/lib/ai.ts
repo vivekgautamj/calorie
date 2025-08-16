@@ -152,7 +152,7 @@ export async function analyzeNutrition(input: string): Promise<SimpleNutritionAn
       throw new Error('Google Gemini API key not configured')
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     // Use the simple prompt for clean JSON
     const result = await model.generateContent(simpleNutritionPrompt + input)
@@ -179,24 +179,19 @@ export async function analyzeNutrition(input: string): Promise<SimpleNutritionAn
     
     return analysis
   } catch (error) {
-    console.error('Error analyzing nutrition:', error)
-    throw new Error('Failed to analyze nutrition input')
+    console.error('Error in analyzeNutrition:', error)
+    throw error
   }
 }
 
-// Generate exercise recommendations
-export async function generateExerciseRecommendations(
-  exercise: string,
-  duration: number,
-  intensity: string,
-  exerciseType: string
-): Promise<any> {
+// Generate personalized exercise recommendations
+export async function generateExerciseRecommendations(exercise: string, duration: number, intensity: string, exerciseType: string): Promise<AIRecommendation[]> {
   try {
     if (!process.env.GOOGLE_GEMINI_API_KEY) {
       throw new Error('Google Gemini API key not configured')
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     const prompt = exerciseRecommendationPrompt
       .replace('{exercise}', exercise)
@@ -208,77 +203,34 @@ export async function generateExerciseRecommendations(
     const response = await result.response
     const text = response.text().trim()
     
-    // Try to parse JSON directly
+    // Try to parse the response as JSON
+    let recommendations
     try {
-      return JSON.parse(text)
+      recommendations = JSON.parse(text)
     } catch (parseError) {
-      // Extract JSON if needed
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      // If direct parsing fails, try to extract JSON
+      const jsonMatch = text.match(/\[[\s\S]*\]/)
       if (!jsonMatch) {
-        throw new Error('Invalid response format')
+        throw new Error('Invalid response format from AI')
       }
-      return JSON.parse(jsonMatch[0])
+      recommendations = JSON.parse(jsonMatch[0])
     }
+    
+    return recommendations
   } catch (error) {
     console.error('Error generating exercise recommendations:', error)
-    throw new Error('Failed to generate exercise recommendations')
+    throw error
   }
 }
 
-// Simple nutrition analysis for basic responses
-export async function simpleNutritionAnalysis(input: string): Promise<any> {
+// Generate chat response
+export async function generateChatResponse(message: string, context: string): Promise<string> {
   try {
     if (!process.env.GOOGLE_GEMINI_API_KEY) {
       throw new Error('Google Gemini API key not configured')
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
-    
-    const simplePrompt = `
-Analyze this food input and return ONLY a JSON object with basic nutrition info:
-"${input}"
-
-Return ONLY this JSON format:
-{
-  "protein": number,
-  "calories": number,
-  "carbs": number,
-  "fat": number,
-  "fiber": number
-}
-`
-    
-    const result = await model.generateContent(simplePrompt)
-    const response = await result.response
-    const text = response.text().trim()
-    
-    // Try to parse JSON directly
-    try {
-      return JSON.parse(text)
-    } catch (parseError) {
-      // Extract JSON if needed
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        throw new Error('Invalid response format')
-      }
-      return JSON.parse(jsonMatch[0])
-    }
-  } catch (error) {
-    console.error('Error in simple nutrition analysis:', error)
-    throw new Error('Failed to analyze nutrition')
-  }
-}
-
-export async function generateChatResponse(
-  message: string, 
-  context: string = ''
-): Promise<string> {
-  try {
-    if (!process.env.GOOGLE_GEMINI_API_KEY) {
-      return 'I apologize, but the AI nutritionist is not properly configured. Please check your API key setup.'
-    }
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     const prompt = chatPrompt
       .replace('{context}', context)
@@ -289,7 +241,7 @@ export async function generateChatResponse(
     return response.text()
   } catch (error) {
     console.error('Error generating chat response:', error)
-    return 'I apologize, but I\'m having trouble processing your request right now. Please try again.'
+    throw error
   }
 }
 

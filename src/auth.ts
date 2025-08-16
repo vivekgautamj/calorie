@@ -3,7 +3,7 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { createOrUpdateUser } from "@/lib/supabase"
 
-const authConfig = {
+const authConfig: any = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -11,7 +11,7 @@ const authConfig = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: { user: any; account: any }) {
       if (account?.provider === "google" && user && user.email && user.name) {
         try {
           // Create or update user in Supabase
@@ -23,7 +23,7 @@ const authConfig = {
           
           // Store Supabase user ID in the user object for session
           if (userData) {
-            ;(user as any).supabaseUserId = userData.id
+            ;(user as any).supabaseUserId = userData.user_id
           }
           
           return true
@@ -35,14 +35,14 @@ const authConfig = {
       }
       return true
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.sub! // Auth.js ID
         ;(session.user as any).supabaseUserId = (token as any).supabaseUserId // Supabase User ID
       }
       return session
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }: { token: any; user: any; trigger: any; session: any }) {
       // When user signs in, store the supabaseUserId from the user object
       if (user) {
         token.sub = user.id // Auth.js ID

@@ -225,7 +225,9 @@ export async function getChatMessagesByUser(userId: string, limit: number = 50):
 // Get or create nutrition goals
 export async function getOrCreateNutritionGoals(userId: string): Promise<NutritionGoals> {
   try {
-    // Try to get existing goals
+    console.log('Getting or creating nutrition goals for user:', userId)
+    
+    // First try to get existing goals
     const { data: existingGoals, error: fetchError } = await supabase
       .from('nutrition_goals')
       .select('*')
@@ -238,8 +240,11 @@ export async function getOrCreateNutritionGoals(userId: string): Promise<Nutriti
     }
 
     if (existingGoals) {
+      console.log('Found existing nutrition goals:', existingGoals.id)
       return existingGoals
     }
+
+    console.log('No existing goals found, creating default goals for user:', userId)
 
     // Create default goals if none exist
     const defaultGoals: CreateNutritionGoalsInput = {
@@ -270,6 +275,7 @@ export async function getOrCreateNutritionGoals(userId: string): Promise<Nutriti
       throw new Error(`Failed to create nutrition goals: ${createError.message}`)
     }
 
+    console.log('Created new nutrition goals:', newGoals.id)
     return newGoals
   } catch (error) {
     console.error('Error in getOrCreateNutritionGoals:', error)

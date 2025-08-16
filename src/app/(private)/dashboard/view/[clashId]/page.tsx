@@ -82,11 +82,11 @@ const ViewClashPage = () => {
     const fetchClashAndAnalytics = async () => {
       setLoading(true);
       try {
-        const clashRes = await fetch(`/api/clashes/${clashId}`);
+        const clashRes = await fetch(`/api/dashboard/${clashId}`);
         const clashData = await clashRes.json();
         setClash(clashData);
 
-        const analyticsRes = await fetch(`/api/clashes/${clashId}/analytics`);
+        const analyticsRes = await fetch(`/api/dashboard/${clashId}/analytics`);
         const analyticsData = await analyticsRes.json();
         console.log("Analytics data:", analyticsData); // Debug log
         setAnalytics(analyticsData);
@@ -102,12 +102,12 @@ const ViewClashPage = () => {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const response = await fetch(`/api/clashes/${clashId}`, {
+    const response = await fetch(`/api/dashboard/${clashId}`, {
       method: "DELETE",
     });
     if (response.ok) {
       toast.success("Clash deleted");
-      router.push("/dashboard/clashes");
+      router.push("/dashboard");
     } else {
       toast.error("Failed to delete clash");
     }
@@ -152,7 +152,7 @@ const ViewClashPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <BackButton href="/dashboard/clashes" />
+              <BackButton href="/dashboard" />
             </div>
           </div>
         </div>

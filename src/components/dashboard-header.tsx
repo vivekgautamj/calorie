@@ -19,8 +19,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    if (path === "/dashboard/clashes") {
-      return pathname === "/dashboard/clashes" || pathname === "/dashboard";
+    if (path === "/dashboard") {
+      return pathname === "/dashboard" || pathname === "/dashboard";
     }
     return pathname === path;
   };
@@ -30,7 +30,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
       <div className="flex lg:px-40 xl:px-52 border-b border-gray-200">
         <nav aria-label="Main" data-orientation="horizontal" dir="ltr" data-slot="navigation-menu" data-viewport="true" className="group/navigation-menu relative flex max-w-max flex-1 items-center justify-center min-w-full px-4">
           <div className="flex w-full items-center justify-between gap-12 py-4">
-            <Link href="/dashboard/clashes" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <Image
                 src="/logo.png"
                 alt="Clash Logo"
@@ -45,14 +45,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               <ul data-orientation="horizontal" data-slot="navigation-menu-list" className="group flex-1 list-none items-center justify-center gap-1 hidden lg:flex" dir="ltr">
                 <li data-slot="navigation-menu-item" className="relative">
                   <Button 
-                    variant={isActive("/dashboard/clashes") ? "default" : "ghost"} 
+                    variant={isActive("/dashboard") ? "default" : "ghost"} 
                     size="sm" 
                     asChild
                     className={cn(
-                      isActive("/dashboard/clashes") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      isActive("/dashboard") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
                     )}
                   >
-                    <Link href="/dashboard/clashes">
+                    <Link href="/dashboard">
                       Clashes
                     </Link>
                   </Button>

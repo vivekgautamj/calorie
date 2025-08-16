@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Brain, Calendar, User } from "lucide-react";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -20,7 +21,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-4 w">
+      <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
@@ -32,59 +33,100 @@ export default function Navbar() {
             <span className="text-2xl font-bold text-emerald-600">CalorieAI</span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/" 
-              className={cn(
-                "transition-colors",
-                isActive("/") 
-                  ? "text-emerald-600 font-semibold" 
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              Home
-            </Link>
-            <Link 
-              href="/about" 
-              className={cn(
-                "transition-colors",
-                isActive("/about") 
-                  ? "text-emerald-600 font-semibold" 
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              About
-            </Link>
-            <Link 
-              href="/pricing" 
-              className={cn(
-                "transition-colors",
-                isActive("/pricing") 
-                  ? "text-blue-600 font-semibold" 
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              Pricing
-            </Link>
-          </div>
+          {/* Navigation Links - Show different nav for authenticated users */}
+          {session ? (
+            <div className="flex items-center space-x-4">
+              <Link href="/dashboard">
+                <Button 
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    "flex items-center space-x-2",
+                    isActive("/dashboard") 
+                      ? "text-emerald-600 bg-emerald-50" 
+                      : "text-gray-600 hover:text-gray-900"
+                  )}
+                >
+                  <Brain className="w-4 h-4" />
+                  <span>Add</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/summary">
+                <Button 
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    "flex items-center space-x-2",
+                    isActive("/dashboard/summary") 
+                      ? "text-emerald-600 bg-emerald-50" 
+                      : "text-gray-600 hover:text-gray-900"
+                  )}
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Summary</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/profile">
+                <Button 
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    "flex items-center space-x-2",
+                    isActive("/dashboard/profile") 
+                      ? "text-emerald-600 bg-emerald-50" 
+                      : "text-gray-600 hover:text-gray-900"
+                  )}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Profile</span>
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link 
+                href="/" 
+                className={cn(
+                  "transition-colors",
+                  isActive("/") 
+                    ? "text-emerald-600 font-semibold" 
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Home
+              </Link>
+              <Link 
+                href="/about" 
+                className={cn(
+                  "transition-colors",
+                  isActive("/about") 
+                    ? "text-emerald-600 font-semibold" 
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                About
+              </Link>
+              <Link 
+                href="/pricing" 
+                className={cn(
+                  "transition-colors",
+                  isActive("/pricing") 
+                    ? "text-blue-600 font-semibold" 
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Pricing
+              </Link>
+            </div>
+          )}
 
           {/* Auth Button */}
           <div className="flex items-center space-x-4">
             {session ? (
               <div className="flex items-center space-x-3">
-                <Link href="/dashboard">
-                  <Button 
-                    size="sm" 
-                    className={cn(
-                      isActive("/dashboard") 
-                        ? "bg-blue-700 hover:bg-blue-800" 
-                        : "bg-blue-600 hover:bg-blue-700"
-                    )}
-                  >
-                    Dashboard
-                  </Button>
-                </Link>
+                <span className="text-sm text-gray-600 hidden md:block">
+                  Hi, {session.user?.name?.split(" ")[0]}!
+                </span>
               </div>
             ) : (
               <Button 

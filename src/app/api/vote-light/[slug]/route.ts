@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getClashBySlug } from '@/lib/db/clashes';
+import { getClashBySlug } from '@/lib/db/dashboard';
 import { supabase } from '@/lib/supabase';
 
 // Simple rate limiting using IP
