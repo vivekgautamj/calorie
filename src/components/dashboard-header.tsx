@@ -20,7 +20,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const isActive = (path: string) => {
     if (path === "/dashboard") {
-      return pathname === "/dashboard" || pathname === "/dashboard";
+      return pathname === "/dashboard" || pathname === "/dashboard/";
     }
     return pathname === path;
   };
@@ -31,43 +31,54 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         <nav aria-label="Main" data-orientation="horizontal" dir="ltr" data-slot="navigation-menu" data-viewport="true" className="group/navigation-menu relative flex max-w-max flex-1 items-center justify-center min-w-full px-4">
           <div className="flex w-full items-center justify-between gap-12 py-4">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <Image
-                src="/logo.png"
-                alt="Clash Logo"
-                width={32}
-                height={32}
-                className="rounded-lg"
-              />
-              <span className="text-lg font-semibold tracking-tighter">calorie</span>
+              
+              <span className="text-2xl font-semibold tracking-tighter">Calorie</span>
             </Link>
             
             <div style={{ position: "relative" }}>
               <ul data-orientation="horizontal" data-slot="navigation-menu-list" className="group flex-1 list-none items-center justify-center gap-1 hidden lg:flex" dir="ltr">
-                <li data-slot="navigation-menu-item" className="relative">
+              <li data-slot="navigation-menu-item" className="relative">
                   <Button 
                     variant={isActive("/dashboard") ? "default" : "ghost"} 
                     size="sm" 
                     asChild
                     className={cn(
-                      isActive("/dashboard") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      isActive("/dashboard") && "bg-orange-100 text-orange-600 hover:bg-orange-200"
                     )}
                   >
-                    <Link href="/dashboard">
-                      Clashes
+                    <Link href="/dashboard/">
+                      Add
                     </Link>
                   </Button>
                 </li>
-                <Button 
-                  variant={isActive("/dashboard/create") ? "default" : "ghost"} 
-                  size="sm" 
-                  asChild
-                  className={cn(
-                    isActive("/dashboard/create") && "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                  )}
-                >
-                  <Link href="/dashboard/create">Create</Link>
-                </Button>
-                
+                <li data-slot="navigation-menu-item" className="relative">
+                  <Button 
+                    variant={isActive("/dashboard/summary") ? "default" : "ghost"} 
+                    size="sm" 
+                    asChild
+                    className={cn(
+                      isActive("/dashboard/summary") && "bg-orange-100 text-orange-600 hover:bg-orange-200"
+                    )}
+                  >
+                    <Link href="/dashboard/summary">
+                      Summary
+                    </Link>
+                  </Button>
+                </li>
+                <li data-slot="navigation-menu-item" className="relative">
+                  <Button 
+                    variant={isActive("/dashboard/profile") ? "default" : "ghost"} 
+                    size="sm" 
+                    asChild
+                    className={cn(
+                      isActive("/dashboard/profile") && "bg-orange-100 text-orange-600 hover:bg-orange-200"
+                    )}
+                  >
+                    <Link href="/dashboard/profile">
+                      Profile
+                    </Link>
+                  </Button>
+                </li>
               </ul>
             </div>
             

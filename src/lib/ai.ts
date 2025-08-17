@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '')
 
 export interface SimpleNutritionAnalysis {
+  food_name: string
   protein: number
   fat: number
   fiber: number
@@ -10,12 +11,6 @@ export interface SimpleNutritionAnalysis {
   calories: number
   sugar: number
   sodium: number
-  exercise: null | {
-    name: string
-    duration: number
-    calories_burned: number
-    intensity: 'low' | 'moderate' | 'high'
-  }
   suggestion: string
 }
 
@@ -30,13 +25,18 @@ export interface AIRecommendation {
 
 // Simple nutrition prompt for clean JSON
 const simpleNutritionPrompt = `
-SYSTEM: You are a JSON-only nutrition analyzer. You must respond with ONLY valid JSON, no other text.
+SYSTEM: You are a nutrition expert. Analyze the user's input and respond appropriately.
 
-INPUT: Analyze the user's food/exercise input and return nutrition data.
+INPUT: Analyze the user's message and determine if it's food tracking or general conversation.
 
-OUTPUT FORMAT: Return ONLY this JSON structure, no other text:
+OUTPUT RULES:
+- If the user is tracking food: Return JSON with nutrition data
+- If the user is asking questions or chatting: Return JSON with calories: 0 to indicate no tracking
+- ALWAYS include food_name in the JSON response
 
+NUTRITION TRACKING JSON FORMAT:
 {
+  "food_name": "string (REQUIRED - extract from user input)",
   "protein": number,
   "fat": number,
   "fiber": number,
@@ -44,27 +44,35 @@ OUTPUT FORMAT: Return ONLY this JSON structure, no other text:
   "calories": number,
   "sugar": number,
   "sodium": number,
-  "exercise": null | {
-    "name": "string",
-    "duration": number,
-    "calories_burned": number,
-    "intensity": "low|moderate|high"
-  },
   "suggestion": "string"
 }
 
-RULES:
-- Return ONLY the JSON object above
-- No explanations, no markdown, no extra text
-- Use realistic nutritional values
-- For Indian foods, use appropriate estimates
-- If exercise mentioned, fill exercise object, otherwise set to null
+EXAMPLES:
+- "I ate 2 roti and dal" → {"food_name": "2 Roti and Dal", "calories": 310, "protein": 20.5, "carbs": 55, "fat": 2, "fiber": 15, "sugar": 2, "sodium": 300, "suggestion": "Good combination of carbs and protein"}
+- "What should I eat?" → {"food_name": "No food tracked", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0, "sugar": 0, "sodium": 0, "suggestion": ""}
+- "Have you eaten today?" → {"food_name": "No food tracked", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0, "sugar": 0, "sodium": 0, "suggestion": ""}
+- "I had breakfast with eggs" → {"food_name": "Eggs", "calories": 140, "protein": 12, "carbs": 1, "fat": 10, "fiber": 0, "sugar": 1, "sodium": 140, "suggestion": "Great protein source for breakfast"}
 
-FOOD ESTIMATES:
+FOOD NAME EXTRACTION RULES:
+- ALWAYS extract and include food_name from the user's input
+- Use clear, descriptive names (e.g., "Roti and Dal", "Chicken Rice", "Apple")
+- For multiple items, combine them naturally (e.g., "2 Roti and Dal", "Eggs and Toast")
+- Include quantities when mentioned (e.g., "2 Apples", "1 Cup Rice")
+- If no food is mentioned, use "No food tracked"
+- Keep it concise but descriptive
+
+COMMON FOOD ESTIMATES:
 - 1 roti: 80 calories, 2.5g protein, 15g carbs, 1g fat
 - 1 cup dal: 230 calories, 18g protein, 40g carbs, 1g fat, 15g fiber
 - 1 cup rice: 200 calories, 4g protein, 45g carbs, 0.5g fat
 - 1 cup yogurt: 150 calories, 8g protein, 12g carbs, 8g fat
+- 1 egg: 70 calories, 6g protein, 0.5g carbs, 5g fat
+- 1 apple: 95 calories, 0.5g protein, 25g carbs, 0.3g fat, 4g fiber
+- 1 banana: 105 calories, 1.3g protein, 27g carbs, 0.4g fat, 3g fiber
+- 1 cup milk: 150 calories, 8g protein, 12g carbs, 8g fat
+- 1 cup coffee: 2 calories, 0.3g protein, 0g carbs, 0g fat
+
+CRITICAL: Always return valid JSON with food_name field included.
 
 USER INPUT: `
 
@@ -156,8 +164,17 @@ export async function analyzeNutrition(input: string): Promise<SimpleNutritionAn
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
-    // Use the simple prompt for clean JSON
-    const result = await model.generateContent(simpleNutritionPrompt + input)
+    // Use the simple prompt for clean JSON with generation config
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: simpleNutritionPrompt + input }] }],
+      generationConfig: {
+        temperature: 0.1, // Low temperature for consistent output
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 500,
+      }
+    })
+    
     const response = await result.response
     const text = response.text().trim()
     
@@ -185,54 +202,20 @@ export async function analyzeNutrition(input: string): Promise<SimpleNutritionAn
     }
     
     // Validate the response structure
-    if (!analysis.protein || !analysis.fat || !analysis.carbs || !analysis.calories) {
-      console.error('Invalid nutrition analysis structure:', analysis)
-      throw new Error('Invalid nutrition analysis structure - missing required fields')
+    if (!analysis.food_name || typeof analysis.food_name !== 'string') {
+      console.error('Invalid nutrition analysis structure - missing or invalid food_name:', analysis)
+      throw new Error('Invalid nutrition analysis structure - missing required food_name field')
+    }
+    
+    if (analysis.calories > 0 && (!analysis.protein || !analysis.fat || !analysis.carbs)) {
+      console.error('Invalid nutrition analysis structure - missing nutrition values:', analysis)
+      throw new Error('Invalid nutrition analysis structure - missing required nutrition fields')
     }
     
     console.log('Parsed analysis:', analysis)
     return analysis
   } catch (error) {
     console.error('Error in analyzeNutrition:', error)
-    throw error
-  }
-}
-
-// Generate personalized exercise recommendations
-export async function generateExerciseRecommendations(exercise: string, duration: number, intensity: string, exerciseType: string): Promise<AIRecommendation[]> {
-  try {
-    if (!process.env.GOOGLE_GEMINI_API_KEY) {
-      throw new Error('Google Gemini API key not configured')
-    }
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-    
-    const prompt = exerciseRecommendationPrompt
-      .replace('{exercise}', exercise)
-      .replace('{duration}', duration.toString())
-      .replace('{intensity}', intensity)
-      .replace('{exercise_type}', exerciseType)
-    
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text().trim()
-    
-    // Try to parse the response as JSON
-    let recommendations
-    try {
-      recommendations = JSON.parse(text)
-    } catch (parseError) {
-      // If direct parsing fails, try to extract JSON
-      const jsonMatch = text.match(/\[[\s\S]*\]/)
-      if (!jsonMatch) {
-        throw new Error('Invalid response format from AI')
-      }
-      recommendations = JSON.parse(jsonMatch[0])
-    }
-    
-    return recommendations
-  } catch (error) {
-    console.error('Error generating exercise recommendations:', error)
     throw error
   }
 }

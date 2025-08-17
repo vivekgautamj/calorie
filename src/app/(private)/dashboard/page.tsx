@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Send, Plus, BarChart3, User, Calendar } from "lucide-react";
+import { Send, Calendar, User, Bell, Target, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface ChatMessage {
@@ -22,9 +21,6 @@ interface NutritionTotals {
   protein: number;
   carbs: number;
   fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
 }
 
 interface NutritionGoals {
@@ -32,8 +28,248 @@ interface NutritionGoals {
   daily_protein: number;
   daily_carbs: number;
   daily_fat: number;
-  daily_fiber: number;
 }
+
+// Nutrition Widget Component
+const NutritionWidget = ({ nutritionData }: { nutritionData: any }) => (
+  <div className="mt-3 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border border-orange-200">
+    <div className="flex items-center gap-2 mb-2">
+      <Target className="w-4 h-4 text-orange-600" />
+      <span className="text-sm font-semibold text-orange-800">Nutrition Added</span>
+    </div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="text-center p-2 bg-white rounded-lg border border-orange-100">
+        <div className="text-lg font-bold text-orange-600">{nutritionData.calories}</div>
+        <div className="text-xs text-orange-700">calories</div>
+      </div>
+      <div className="text-center p-2 bg-white rounded-lg border border-orange-100">
+        <div className="text-lg font-bold text-blue-600">{nutritionData.protein}g</div>
+        <div className="text-xs text-blue-700">protein</div>
+      </div>
+      <div className="text-center p-2 bg-white rounded-lg border border-orange-100">
+        <div className="text-lg font-bold text-green-600">{nutritionData.carbs}g</div>
+        <div className="text-xs text-green-700">carbs</div>
+      </div>
+      <div className="text-center p-2 bg-white rounded-lg border border-orange-100">
+        <div className="text-lg font-bold text-purple-600">{nutritionData.fat}g</div>
+        <div className="text-xs text-purple-700">fat</div>
+      </div>
+    </div>
+  </div>
+);
+
+// Reusable Components
+const CalorieCard = ({ todayTotals, goals }: { todayTotals: NutritionTotals; goals: NutritionGoals }) => (
+  <Card className="mb-4 overflow-hidden">
+    <div className="bg-gradient-to-b from-[#FF8C42] to-[#FFB380] p-6 text-white">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <p className="text-sm opacity-90">Eaten {todayTotals.calories}</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold">
+              {Math.max(0, goals.daily_calories - todayTotals.calories)}
+            </span>
+            <span className="text-lg opacity-90">
+              {todayTotals.calories > goals.daily_calories ? 'kcal over' : 'kcal remaining'}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mb-4">
+        <p className="text-sm opacity-90 mb-2">Burned 651</p>
+        <div className="w-full bg-white/20 rounded-full h-2">
+          <div 
+            className="bg-white h-2 rounded-full transition-all duration-300" 
+            style={{ width: '75%' }}
+          ></div>
+        </div>
+      </div>
+    </div>
+    
+    <CardContent className="p-4">
+      <div className="grid grid-cols-3 gap-3">
+        {/* Carbs */}
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-800 mb-1">Carbs</p>
+          <p className="text-sm text-gray-600 mb-2">{todayTotals.carbs} / {goals.daily_carbs}g</p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-[#FF8C42] to-[#FFB380] h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${Math.min((todayTotals.carbs / goals.daily_carbs) * 100, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+        
+        {/* Protein */}
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-800 mb-1">Protein</p>
+          <p className="text-sm text-gray-600 mb-2">{todayTotals.protein} / {goals.daily_protein}g</p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-[#FF8C42] h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${Math.min((todayTotals.protein / goals.daily_protein) * 100, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+        
+        {/* Fat */}
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-800 mb-1">Fat</p>
+          <p className="text-sm text-gray-600 mb-2">{todayTotals.fat} / {goals.daily_fat}g</p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-[#FF8C42] to-[#FFB380] h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${Math.min((todayTotals.fat / goals.daily_fat) * 100, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const FoodSummaryCard = ({ dailyEntries }: { dailyEntries: any[] }) => (
+  <Card>
+    <CardHeader className="pb-3">
+      <CardTitle className="text-lg">Today's Food Summary</CardTitle>
+    </CardHeader>
+    <CardContent>
+      {dailyEntries.length > 0 ? (
+        <div className="space-y-3">
+          {dailyEntries.map((entry, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#FF8C42] rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">🍽️</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">{entry.food_name}</p>
+                    <p className="text-sm text-gray-600">{entry.quantity} {entry.unit}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-[#FF8C42]">{entry.calories} cal</p>
+                <p className="text-xs text-gray-500">
+                  {entry.protein}g P • {entry.carbs}g C • {entry.fat}g F
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <p>No food entries today</p>
+          <p className="text-sm">Start tracking your meals to see them here</p>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
+
+const ChatInterface = ({ 
+  messages, 
+  input, 
+  setInput, 
+  sendMessage, 
+  handleKeyPress, 
+  isLoading, 
+  isLoadingData 
+}: {
+  messages: ChatMessage[];
+  input: string;
+  setInput: (value: string) => void;
+  sendMessage: () => void;
+  handleKeyPress: (e: React.KeyboardEvent) => void;
+  isLoading: boolean;
+  isLoadingData: boolean;
+}) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  return (
+    <Card className="h-full">
+      <CardContent className="p-0 h-full flex flex-col">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {isLoadingData ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-gray-500">Loading...</div>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-gray-500">
+                <p>Tell me what you ate today...</p>
+              </div>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.is_user ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                    message.is_user
+                      ? 'bg-[#FF8C42] text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm">{message.message}</p>
+                  {message.nutrition_data && (
+                    <NutritionWidget nutritionData={message.nutrition_data} />
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 text-gray-900 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 animate-pulse" />
+                  <p className="text-sm">Analyzing your food...</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="p-4 border-t">
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Tell me what you ate today..."
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={isLoading || !input.trim()}
+              size="icon"
+              className="bg-[#FF8C42] hover:bg-[#FFB380]"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -45,25 +281,21 @@ export default function DashboardPage() {
     protein: 0,
     carbs: 0,
     fat: 0,
-    fiber: 0,
-    sugar: 0,
-    sodium: 0,
   });
   const [goals, setGoals] = useState<NutritionGoals>({
     daily_calories: 2000,
     daily_protein: 150,
     daily_carbs: 250,
     daily_fat: 65,
-    daily_fiber: 25,
   });
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dailyEntries, setDailyEntries] = useState<any[]>([]);
 
   useEffect(() => {
     if (session?.user?.email && messages.length === 0) {
-      console.log('Loading dashboard data for user:', session.user.email)
       loadAllData();
     }
-  }, [session?.user?.email, messages.length]); // Only run when user email changes and messages not loaded
+  }, [session?.user?.email, messages.length]);
 
   const loadChatHistory = async () => {
     try {
@@ -92,27 +324,58 @@ export default function DashboardPage() {
 
   const loadGoals = async () => {
     try {
-      console.log('Loading goals...')
       const response = await fetch("/api/goals");
       const data = await response.json();
       if (data.goals) {
-        console.log('Goals loaded successfully')
         setGoals(data.goals);
+      } else {
+        // Use default goals if none exist
+        setGoals({
+          daily_calories: 2000,
+          daily_protein: 150,
+          daily_carbs: 250,
+          daily_fat: 65,
+        });
       }
     } catch (error) {
       console.error("Error loading goals:", error);
-    } finally {
-      setIsLoadingData(false);
+      // Use default goals on error
+      setGoals({
+        daily_calories: 2000,
+        daily_protein: 150,
+        daily_carbs: 250,
+        daily_fat: 65,
+      });
+    }
+  };
+
+  const loadDailyEntries = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const response = await fetch(`/api/nutrition?date=${today}&type=daily`);
+      const data = await response.json();
+      if (data.entries) {
+        setDailyEntries(data.entries);
+      }
+    } catch (error) {
+      console.error("Error loading daily entries:", error);
     }
   };
 
   const loadAllData = async () => {
     setIsLoadingData(true);
-    await Promise.all([
-      loadChatHistory(),
-      loadTodayNutrition(),
-      loadGoals()
-    ]);
+    try {
+      await Promise.all([
+        loadChatHistory(),
+        loadTodayNutrition(),
+        loadGoals(),
+        loadDailyEntries(),
+      ]);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setIsLoadingData(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -154,7 +417,8 @@ export default function DashboardPage() {
         // Reload nutrition data if nutrition was added
         if (data.nutritionData) {
           await loadTodayNutrition();
-          toast.success("Nutrition data added successfully!");
+          await loadDailyEntries();
+          toast.success("Nutrition data added!");
         }
       }
     } catch (error) {
@@ -172,176 +436,56 @@ export default function DashboardPage() {
     }
   };
 
-  const getProgressPercentage = (current: number, goal: number) => {
-    return Math.min((current / goal) * 100, 100);
-  };
+  const today = new Date().toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-      {/* Mobile App Header */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-lg font-bold text-gray-900">
-                Hi, {session?.user?.name?.split(" ")[0]}! 👋
-              </h1>
-              <p className="text-xs text-gray-600">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'short',
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm font-semibold text-emerald-600">
-                {new Date().toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-              </div>
-            </div>
+    <div className="min-h-screen bg-[#F8F5F0]">
+      
+
+      <div className="max-w-7xl mx-auto p-4">
+        {/* Desktop Layout */}
+        <div className="hidden md:flex gap-6 h-[calc(100vh-200px)]">
+          {/* Left Side - Summary */}
+          <div className="w-1/2 space-y-6">
+            <CalorieCard todayTotals={todayTotals} goals={goals} />
+            <FoodSummaryCard dailyEntries={dailyEntries} />
+          </div>
+
+          {/* Right Side - Chat Interface */}
+          <div className="w-1/2">
+            <ChatInterface
+              messages={messages}
+              input={input}
+              setInput={setInput}
+              sendMessage={sendMessage}
+              handleKeyPress={handleKeyPress}
+              isLoading={isLoading}
+              isLoadingData={isLoadingData}
+            />
           </div>
         </div>
-      </div>
 
-      <div className="max-w-md mx-auto px-4 py-4 space-y-4 pb-24">
-        {/* Today's Progress - Mobile Optimized */}
-        <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BarChart3 className="w-4 h-4 text-emerald-600" />
-              Today's Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoadingData ? (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Calories</span>
-                  <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
-                </div>
-                <Progress value={0} className="h-2" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Protein</span>
-                  <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
-                </div>
-                <Progress value={0} className="h-2" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Carbs</span>
-                  <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
-                </div>
-                <Progress value={0} className="h-2" />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Calories</span>
-                  <span className="text-sm font-medium">{todayTotals.calories} / {goals.daily_calories}</span>
-                </div>
-                <Progress value={getProgressPercentage(todayTotals.calories, goals.daily_calories)} className="h-2" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Protein</span>
-                  <span className="text-sm font-medium">{todayTotals.protein.toFixed(1)}g / {goals.daily_protein}g</span>
-                </div>
-                <Progress value={getProgressPercentage(todayTotals.protein, goals.daily_protein)} className="h-2" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Carbs</span>
-                  <span className="text-sm font-medium">{todayTotals.carbs.toFixed(1)}g / {goals.daily_carbs}g</span>
-                </div>
-                <Progress value={getProgressPercentage(todayTotals.carbs, goals.daily_carbs)} className="h-2" />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Chat Interface - Mobile Optimized */}
-        <Card className="h-[calc(100vh-280px-100px)] flex flex-col shadow-sm border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <User className="w-4 h-4 text-emerald-600" />
-              AI Nutritionist
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col p-0">
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 space-y-3">
-              {isLoadingData ? (
-                <div className="text-center text-gray-500 mt-8 px-4">
-                  <div className="w-10 h-10 mx-auto mb-3 text-gray-300 animate-spin" />
-                  <p className="text-base font-medium mb-2">Loading your data...</p>
-                  <p className="text-sm">Please wait while we fetch your nutrition and goals.</p>
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="text-center text-gray-500 mt-8 px-4">
-                  <User className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                  <p className="text-base font-medium mb-2">Welcome to your AI Nutritionist! 🎉</p>
-                  <p className="text-sm">I'm here to help you track your nutrition and achieve your health goals.</p>
-                  <div className="mt-3 space-y-1 text-xs">
-                    <p className="font-medium text-emerald-600">Try these examples:</p>
-                    <p>• "I ate 2 roti and a bowl of dal"</p>
-                    <p>• "I had breakfast with 2 eggs and toast"</p>
-                    <p>• "I went for a 30 minute run"</p>
-                    <p>• "Show me my weekly summary"</p>
-                  </div>
-                </div>
-              ) : (
-                messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.is_user ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-3 py-2 ${
-                        message.is_user
-                          ? "bg-emerald-600 text-white"
-                          : "bg-gray-100 text-gray-900"
-                      }`}
-                    >
-                      <p className="text-sm leading-relaxed">{message.message}</p>
-                      {message.nutrition_data && (
-                        <div className="mt-2 p-2 bg-white/10 rounded-lg text-xs">
-                          <p className="font-semibold">Added to your log:</p>
-                          <p>{message.nutrition_data.food_name} - {message.nutrition_data.calories} calories</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Input - Mobile Optimized */}
-            <div className="p-4 border-t border-gray-100 bg-white/50">
-              <div className="flex gap-2">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Tell me what you ate or exercised today..."
-                  className="bg-white flex-1 text-sm rounded-full border-gray-200 focus:border-emerald-500"
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={sendMessage}
-                  disabled={isLoading || !input.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-700 rounded-full w-10 h-10 p-0"
-                >
-                  {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Mobile Layout */}
+        <div className="md:hidden space-y-4">
+          <CalorieCard todayTotals={todayTotals} goals={goals} />
+          <FoodSummaryCard dailyEntries={dailyEntries} />
+          <div className="h-[calc(100vh-400px)]">
+            <ChatInterface
+              messages={messages}
+              input={input}
+              setInput={setInput}
+              sendMessage={sendMessage}
+              handleKeyPress={handleKeyPress}
+              isLoading={isLoading}
+              isLoadingData={isLoadingData}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

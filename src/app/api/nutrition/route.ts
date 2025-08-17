@@ -55,6 +55,43 @@ export async function GET(request: NextRequest) {
         totals,
         date,
       })
+    } else if (type === 'weekly') {
+      // Get weekly nutrition data (last 7 days)
+      const endDate = new Date().toISOString().split('T')[0]
+      const startDate = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      
+      const entries = await getNutritionEntriesByDateRange(userId, startDate, endDate)
+      
+      // Group by date
+      const entriesByDate = entries.reduce((acc, entry) => {
+        if (!acc[entry.date]) {
+          acc[entry.date] = []
+        }
+        acc[entry.date].push(entry)
+        return acc
+      }, {} as Record<string, typeof entries>)
+
+      // Generate data for all 7 days, even if no entries
+      const weeklyData = []
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        const dayEntries = entriesByDate[currentDate] || []
+        const dayTotals = calculateDailyTotals(dayEntries)
+        
+        weeklyData.unshift({
+          date: currentDate,
+          calories: dayTotals.calories,
+          protein: dayTotals.protein,
+          carbs: dayTotals.carbs,
+          fat: dayTotals.fat,
+        })
+      }
+
+      return NextResponse.json({
+        weeklyData,
+        startDate,
+        endDate,
+      })
     } else if (type === 'weekly' && startDate && endDate) {
       // Get weekly nutrition data
       const entries = await getNutritionEntriesByDateRange(userId, startDate, endDate)
