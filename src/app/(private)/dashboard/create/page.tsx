@@ -1,15 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { ClashForm, ClashOption } from "@/components/ClashForm";
 
+interface ClashFormValues {
+  title: string;
+  description: string;
+  options: ClashOption[];
+  showCta: boolean;
+  showResults: boolean;
+  ctaText: string;
+  ctaUrl: string;
+  expireAfter: string;
+}
+
 const CreatePage = () => {
   const router = useRouter();
-  const { data: session } = useSession();
 
-  const handleCreateClash = async (values: any) => {
+  const handleCreateClash = async (values: ClashFormValues) => {
     try {
       // Upload all images first using signed URLs
       const uploadedOptions = await Promise.all(values.options.map(async (option: ClashOption) => {
@@ -65,7 +74,7 @@ const CreatePage = () => {
       }
       toast.success("Clash created successfully");
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to create clash");
     }
   };

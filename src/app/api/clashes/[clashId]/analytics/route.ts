@@ -1,11 +1,21 @@
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
+interface ViewData {
+  device_fingerprint: string;
+  referrer: string;
+}
+
+interface VoteData {
+  option_index: number;
+  created_at: string;
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clashId: string } }
+  { params }: { params: Promise<{ clashId: string }> }
 ) {
-  const { clashId } = params;
+  const { clashId } = await params;
   if (!clashId) {
     return NextResponse.json({ error: "Clash ID is required" }, { status: 400 });
   }
@@ -34,11 +44,11 @@ export async function GET(
   }
 
   const totalViews = viewsData.length;
-  const uniqueViews = new Set(viewsData.map((v: any) => v.device_fingerprint)).size;
+  const uniqueViews = new Set(viewsData.map((v: ViewData) => v.device_fingerprint)).size;
 
   // Top referrers
   const referrerCount: Record<string, number> = {};
-  viewsData.forEach((v: any) => {
+  viewsData.forEach((v: ViewData) => {
     const ref = v.referrer || "(direct)";
     referrerCount[ref] = (referrerCount[ref] || 0) + 1;
   });
@@ -62,7 +72,7 @@ export async function GET(
   for (let i = 0; i < numOptions; i++) {
     optionCounts[i] = 0;
   }
-  votesData.forEach((vote: any) => {
+  votesData.forEach((vote: VoteData) => {
     const idx = String(vote.option_index);
     if (optionCounts[idx] !== undefined) {
       optionCounts[idx]++;
@@ -83,12 +93,12 @@ export async function GET(
   // Determine winning option(s)
   const maxVotes = Math.max(...Object.values(optionCounts));
   const winningOption = Object.entries(optionCounts)
-    .filter(([_, count]) => count === maxVotes && maxVotes > 0)
+    .filter(([, count]) => count === maxVotes && maxVotes > 0)
     .map(([option]) => Number(option));
 
   // Time series for votes (group by hour only)
   const votesTimeSeriesMap: Record<string, number> = {};
-  votesData.forEach((vote: any) => {
+  votesData.forEach((vote: VoteData) => {
     const date = new Date(vote.created_at);
     const hour = date.toISOString().slice(0, 13); // YYYY-MM-DDTHH
     const datetime = hour.replace("T", " ") + ":00"; // YYYY-MM-DD HH:00

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const { clash_id, device_fingerprint, user_agent, referrer } = await req.json();
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("track_clash_views")
     .insert({
       clash_id,

@@ -3,7 +3,11 @@ import { createClash, CreateClashInput } from '@/lib/db/clashes'
 import { auth } from '@/auth'
 import { supabase } from '@/lib/supabase'
 import { nanoid } from 'nanoid'
-import zod, { z } from 'zod'
+import { z } from 'zod'
+
+interface SessionUser {
+  userId: string;
+}
 
 // Zod schema for clash creation
 const createClashSchema = z.object({
@@ -22,7 +26,7 @@ const createClashSchema = z.object({
 })
 
 // GET - Fetch user's clashes
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get the current user session
     const session = await auth()
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user ID from session
-    const userId = (session.user as any).userId
+    const userId = (session.user as SessionUser).userId
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },
@@ -96,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user ID from session
-    const userId = (session.user as any).userId
+    const userId = (session.user as SessionUser).userId
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },

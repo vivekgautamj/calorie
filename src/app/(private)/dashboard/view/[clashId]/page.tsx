@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, LineChart, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -18,11 +18,45 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+interface ClashOption {
+  id: string;
+  text: string;
+  title: string;
+  image_url: string;
+}
+
+interface Clash {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  expires_at: string | null;
+  slug: string | null;
+  cta_text: string;
+  cta_url: string;
+  options: ClashOption[];
+}
+
+interface Analytics {
+  totalViews: number;
+  uniqueViews: number;
+  totalVotes: number;
+  winningOption: number | number[];
+  topReferrers: Array<{
+    referrer: string;
+    count: number;
+  }>;
+  votesTimeSeries: Array<{
+    date: string;
+    votes: number;
+  }>;
+}
+
 const ViewClashPage = () => {
   const { clashId } = useParams();
   const router = useRouter();
-  const [clash, setClash] = useState<any>(null);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [clash, setClash] = useState<Clash | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -133,7 +167,7 @@ const ViewClashPage = () => {
         <div className="flex flex-row gap-2">CTA Text: {clash.cta_text}</div>
         <div className="flex flex-row gap-2">CTA URL: {clash.cta_url}</div>
         <div className="flex flex-row gap-2">
-          {clash.options.map((option: any, idx: number) => (
+          {clash.options.map((option: ClashOption, idx: number) => (
             <div className="flex flex-row gap-2" key={idx}>
               <Image
                 src={option.image_url}
@@ -168,7 +202,7 @@ const ViewClashPage = () => {
             <div>Total Votes: {analytics.totalVotes}</div>
             <div>Top Referrers:</div>
             <ul className="list-disc ml-6">
-              {analytics?.topReferrers?.map((ref: any) => (
+              {analytics?.topReferrers?.map((ref) => (
                 <li key={ref.referrer}>
                   {ref.referrer} ({ref.count})
                 </li>
@@ -176,7 +210,7 @@ const ViewClashPage = () => {
             </ul>
             <div>Votes Over Time:</div>
             <ul className="list-disc ml-6">
-              {analytics?.votesTimeSeries?.map((v: any) => (
+              {analytics?.votesTimeSeries?.map((v) => (
                 <li key={v.date}>
                   {v.date}: {v.votes} votes
                 </li>

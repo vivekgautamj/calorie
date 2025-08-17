@@ -3,6 +3,10 @@ import { auth } from '@/auth'
 import { createClient } from '@supabase/supabase-js'
 import { customAlphabet } from 'nanoid'
 
+interface SessionUser {
+  userId: string;
+}
+
 // Security constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_MIME_TYPES = [
@@ -27,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const userId = (session.user as any).userId
+    const userId = (session.user as SessionUser).userId
     if (!userId) {
       return NextResponse.json({ error: 'User ID not found in session' }, { status: 400 })
     }

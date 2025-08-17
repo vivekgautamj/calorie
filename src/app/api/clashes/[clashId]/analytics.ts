@@ -1,11 +1,21 @@
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
+interface ViewData {
+  device_fingerprint: string;
+  referrer: string;
+}
+
+interface VoteData {
+  option_index: number;
+  created_at: string;
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clashId: string } }
+  { params }: { params: Promise<{ clashId: string }> }
 ) {
-  const { clashId } = params;
+  const { clashId } = await params;
   if (!clashId) {
     return NextResponse.json({ error: "Clash ID is required" }, { status: 400 });
   }
@@ -21,11 +31,11 @@ export async function GET(
   }
 
   const totalViews = viewsData.length;
-  const uniqueViews = new Set(viewsData.map((v: any) => v.device_fingerprint)).size;
+  const uniqueViews = new Set(viewsData.map((v: ViewData) => v.device_fingerprint)).size;
 
   // Top referrers
   const referrerCount: Record<string, number> = {};
-  viewsData.forEach((v: any) => {
+  viewsData.forEach((v: ViewData) => {
     const ref = v.referrer || "(direct)";
     referrerCount[ref] = (referrerCount[ref] || 0) + 1;
   });
@@ -46,7 +56,7 @@ export async function GET(
 
   const totalVotes = votesData.length;
   const optionCounts: Record<string, number> = { "1": 0, "2": 0, "3": 0, "4": 0 };
-  votesData.forEach((vote: any) => {
+  votesData.forEach((vote: VoteData) => {
     const idx = vote.option_index;
     if (optionCounts[idx]) {
       optionCounts[idx]++;
@@ -68,12 +78,12 @@ export async function GET(
   // Determine winning option(s)
   const maxVotes = Math.max(...Object.values(optionCounts));
   const winningOption = Object.entries(optionCounts)
-    .filter(([_, count]) => count === maxVotes && maxVotes > 0)
+    .filter(([, count]) => count === maxVotes && maxVotes > 0)
     .map(([option]) => Number(option));
 
   // Time series for votes (votes per day)
   const votesTimeSeriesMap: Record<string, number> = {};
-  votesData.forEach((vote: any) => {
+  votesData.forEach((vote: VoteData) => {
     const date = new Date(vote.created_at).toISOString().slice(0, 10); // YYYY-MM-DD
     votesTimeSeriesMap[date] = (votesTimeSeriesMap[date] || 0) + 1;
   });

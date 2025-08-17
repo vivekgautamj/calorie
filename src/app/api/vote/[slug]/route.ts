@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 // get the clash data by slug
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }    ) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }    ) {
   const { slug } = await params;
 
   const { data, error } = await supabase
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   return NextResponse.json(data[0]);
 }
 
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }    ) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }    ) {
   // any user can vote
   // user can only add choose 1 option not both
   // user can only vote once
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   const { option, clash_id, device_fingerprint, user_agent } = await req.json();
 
-  const { data, error } = await supabase.from("votes").insert({
+  const { error } = await supabase.from("votes").insert({
     option_index: option,
     clash_id: clash_id,
     device_fingerprint: device_fingerprint,

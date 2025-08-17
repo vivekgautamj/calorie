@@ -2,19 +2,15 @@ import { auth } from "./src/auth"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+interface ExtendedUser {
+  userId?: string;
+}
+
 // Main middleware function
 export default async function middleware(request: NextRequest) {
   // Skip middleware for Auth.js routes to prevent interference
   if (request.nextUrl.pathname.startsWith('/api/auth/')) {
     return NextResponse.next()
-  }
-  
-  // First: Run Auth.js middleware for all routes
-  const authResponse = await auth(request as any)
-  
-  // If Auth.js returned a response (redirect, error, etc.), return it
-  if (authResponse) {
-    return authResponse
   }
   
   // Second: Additional API route protection (only for /api routes)
@@ -33,7 +29,7 @@ export default async function middleware(request: NextRequest) {
       }
       
       // Additional check: ensure user has userId
-      if (!(session.user as any).userId) {
+      if (!(session.user as ExtendedUser).userId) {
         return NextResponse.json(
           { error: 'User profile not found' },
           { status: 401 }

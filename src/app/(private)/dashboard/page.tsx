@@ -5,8 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
+interface Analytics {
+  totalClashesCreated: number;
+  totalVotes: number;
+  topClash?: {
+    title: string;
+    votes: number;
+    views: number;
+  };
+}
+
 const DashboardPage =  () => {
-    const [analytics, setAnalytics] = useState<any>(null);
+    const [analytics, setAnalytics] = useState<Analytics | null>(null);
     const [loading, setLoading] = useState(true);
 
     

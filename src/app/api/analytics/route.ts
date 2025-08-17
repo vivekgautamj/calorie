@@ -1,10 +1,27 @@
 import { supabase } from "@/lib/supabase";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-export async function GET(request: NextRequest) {
+interface Clash {
+  id: string;
+  title: string;
+}
+
+interface Vote {
+  clash_id: string;
+}
+
+interface View {
+  clash_id: string;
+}
+
+interface SessionUser {
+  userId: string;
+}
+
+export async function GET() {
   const session = await auth();
-  const userId = (session?.user as any)?.userId;
+  const userId = (session?.user as SessionUser)?.userId;
   if (!userId) {
     return NextResponse.json({ error: "User ID not found in session" }, { status: 401 });
   }
@@ -19,7 +36,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: clashesError.message }, { status: 500 });
   }
 
-  const clashIds = clashes.map((c: any) => c.id);
+  const clashIds = clashes.map((c: Clash) => c.id);
   if (clashIds.length === 0) {
     return NextResponse.json({
       totalClashesCreated: 0,
@@ -51,12 +68,12 @@ export async function GET(request: NextRequest) {
 
   // Aggregate votes and views per clash
   const votesCountByClash: Record<string, number> = {};
-  votesData.forEach((v: any) => {
+  votesData.forEach((v: Vote) => {
     votesCountByClash[v.clash_id] = (votesCountByClash[v.clash_id] || 0) + 1;
   });
 
   const viewsCountByClash: Record<string, number> = {};
-  viewsData.forEach((v: any) => {
+  viewsData.forEach((v: View) => {
     viewsCountByClash[v.clash_id] = (viewsCountByClash[v.clash_id] || 0) + 1;
   });
 
@@ -72,7 +89,7 @@ export async function GET(request: NextRequest) {
   const topClash = topClashId
     ? {
         id: topClashId,
-        title: clashes.find((c: any) => c.id === topClashId)?.title,
+        title: clashes.find((c: Clash) => c.id === topClashId)?.title,
         votes: votesCountByClash[topClashId] || 0,
         views: viewsCountByClash[topClashId] || 0,
       }

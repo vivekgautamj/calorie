@@ -2,21 +2,25 @@ import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+interface SessionUser {
+  userId: string;
+}
+
 // get clash
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clashId: string } }
+  { params }: { params: Promise<{ clashId: string }> }
 ) {
   try {
-    if (!params.clashId) {
+    const { clashId } = await params;
+    if (!clashId) {
       return NextResponse.json(
         { error: "Clash ID is required" },
         { status: 400 }
       );
     }
-    const { clashId } = params;
     const session = await auth();
-    const userId = (session?.user as any)?.userId;
+    const userId = (session?.user as SessionUser)?.userId;
     if (!userId) {
       return NextResponse.json(
         { error: "User ID not found in session" },
@@ -42,7 +46,7 @@ export async function GET(
       );
     }
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -53,18 +57,18 @@ export async function GET(
 // update clash
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { clashId: string } }
+  { params }: { params: Promise<{ clashId: string }> }
 ) {
   try {
-    if (!params.clashId) {
+    const { clashId } = await params;
+    if (!clashId) {
       return NextResponse.json(
         { error: "Clash ID is required" },
         { status: 400 }
       );
     }
-    const { clashId } = params;
     const session = await auth();
-    const userId = (session?.user as any)?.userId;
+    const userId = (session?.user as SessionUser)?.userId;
     if (!userId) {
       return NextResponse.json(
         { error: "User ID not found in session" },
@@ -92,7 +96,7 @@ export async function PUT(
       );
     }
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -102,18 +106,18 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { clashId: string } }
+  { params }: { params: Promise<{ clashId: string }> }
 ) {
   try {
-    if (!params.clashId) {
+    const { clashId } = await params;
+    if (!clashId) {
       return NextResponse.json(
         { error: "Clash ID is required" },
         { status: 400 }
       );
     }
-    const { clashId } = params;
     const session = await auth();
-    const userId = (session?.user as any)?.userId;
+    const userId = (session?.user as SessionUser)?.userId;
     if (!userId) {
       return NextResponse.json(
         { error: "User ID not found in session" },
@@ -139,7 +143,7 @@ export async function DELETE(
       );
     }
     return NextResponse.json({ message: "Clash deleted successfully" });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

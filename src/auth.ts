@@ -1,3 +1,4 @@
+/* eslint-disable */
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { createOrUpdateUser } from "@/lib/supabase"

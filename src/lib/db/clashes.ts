@@ -234,7 +234,7 @@ export async function updateClash(id: string, input: UpdateClashInput): Promise<
       throw new Error('Clash not found')
     }
 
-    const updateData: any = {
+    const updateData: Partial<UpdateClashInput> & { updated_at: string } = {
       updated_at: new Date().toISOString(),
     }
 

@@ -21,6 +21,17 @@ export interface ClashOption {
   image_file?: File;
 }
 
+interface ClashFormValues {
+  title: string;
+  description: string;
+  options: ClashOption[];
+  ctaText: string;
+  ctaUrl: string;
+  showCta: boolean;
+  showResults: boolean;
+  expireAfter: string;
+}
+
 export interface ClashFormProps {
   initialValues?: {
     title?: string;
@@ -33,7 +44,7 @@ export interface ClashFormProps {
     expireAfter?: string;
   };
   mode: "create" | "edit";
-  onSubmit: (values: any) => Promise<void>;
+  onSubmit: (values: ClashFormValues) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -195,8 +206,8 @@ export const ClashForm: React.FC<ClashFormProps> = ({
         showResults,
         expireAfter,
       });
-    } catch (err: any) {
-      setError(err.message || "Failed to submit");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to submit");
     } finally {
       setIsLoading(false);
     }
@@ -255,7 +266,7 @@ export const ClashForm: React.FC<ClashFormProps> = ({
               <OptionImageUpload
                 value={option.image_url}
                 file={option.image_file}
-                onFileChange={(file) => handleOptionChange(index, "image_file", file as any)}
+                onFileChange={(file) => handleOptionChange(index, "image_file", file)}
                 disabled={isLoading || externalLoading}
               />
             </Card>

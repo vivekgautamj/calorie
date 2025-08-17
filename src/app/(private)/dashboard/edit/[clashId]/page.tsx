@@ -4,10 +4,38 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { ClashForm, ClashOption } from "@/components/ClashForm";
 
+interface ClashFormValues {
+  title: string;
+  description: string;
+  options: ClashOption[];
+  showCta: boolean;
+  showResults: boolean;
+  ctaText: string;
+  ctaUrl: string;
+  expireAfter: string;
+}
+
+interface Clash {
+  id: string;
+  title: string;
+  description: string;
+  options: Array<{
+    id: string;
+    text?: string;
+    title?: string;
+    image_url?: string;
+  }>;
+  cta_text: string;
+  cta_url: string;
+  show_cta: boolean;
+  show_results: boolean;
+  expires_at: string;
+}
+
 const EditClashPage = () => {
   const router = useRouter();
   const { clashId } = useParams();
-  const [clash, setClash] = useState<any>(null);
+  const [clash, setClash] = useState<Clash | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -27,7 +55,7 @@ const EditClashPage = () => {
     if (clashId) fetchClash();
   }, [clashId, router]);
 
-  const handleUpdateClash = async (values: any) => {
+  const handleUpdateClash = async (values: ClashFormValues) => {
     setSaving(true);
     try {
       // Upload all images first using signed URLs (if changed)
@@ -81,7 +109,7 @@ const EditClashPage = () => {
       }
       toast.success("Clash updated successfully");
       router.push(`/dashboard/view/${clashId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to update clash");
     } finally {
       setSaving(false);
@@ -102,7 +130,7 @@ const EditClashPage = () => {
         initialValues={{
           title: clash.title,
           description: clash.description,
-          options: clash.options.map((opt: any) => ({
+          options: clash.options.map((opt) => ({
             ...opt,
             text: opt.text ?? opt.title ?? ""
           })),

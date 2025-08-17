@@ -1,16 +1,32 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Link from "next/link";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
+interface ClashOption {
+  id: string;
+  text: string;
+  image_url: string;
+}
+
+interface Clash {
+  id: string;
+  title: string;
+  description: string;
+  cta_text: string;
+  cta_url: string;
+  options: ClashOption[];
+  error?: string;
+}
+
 const VotePage = () => {
   const { slug } = useParams();
 
-  const [clash, setClash] = useState<any>(null);
+  const [clash, setClash] = useState<Clash | null>(null);
   const [loading, setLoading] = useState(true);
   const [voted, setVoted] = useState(false);
   const [deviceFingerprint, setDeviceFingerprint] = useState("");
@@ -18,7 +34,7 @@ const VotePage = () => {
 
   console.log(slug);
 
-  const fetchClash = async () => {
+  const fetchClash = useCallback(async () => {
     const response = await fetch(`/api/vote/${slug}`);
     const data = await response.json();
     console.log(data);
@@ -29,7 +45,7 @@ const VotePage = () => {
       toast.error(data.error);
       setLoading(false);
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     fetchClash();
@@ -43,7 +59,7 @@ const VotePage = () => {
         });
       });
     }
-  }, [slug]);
+  }, [fetchClash]);
 
   // Track page view when all info is available
   useEffect(() => {
@@ -90,13 +106,17 @@ const VotePage = () => {
     }
   };
 
+  if (!clash) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <h1>Vote Page</h1>
       <div className="flex flex-row gap-2">
         <h1 className="text-2xl font-bold">{clash.title}</h1>
         <p className="text-sm text-muted-foreground">{clash.description}</p>
-        {clash.options.map((option: any, idx: number) => (
+        {clash.options.map((option: ClashOption, idx: number) => (
           <div className="flex flex-row gap-2" key={idx}>
             <Image
               src={option.image_url}

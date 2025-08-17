@@ -4,6 +4,10 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface ExtendedUser {
+  userId?: string;
+}
+
 export function AuthStatus() {
   const { data: session, status } = useSession();
 
@@ -58,7 +62,7 @@ export function AuthStatus() {
           </div>
           <div>
             <p className="text-sm font-medium">User ID:</p>
-            <p className="text-muted-foreground">{(session?.user as any)?.userId}</p>
+            <p className="text-muted-foreground">{(session?.user as ExtendedUser)?.userId}</p>
           </div>
           {session?.user?.image && (
             <div>

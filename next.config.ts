@@ -2,9 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    serverComponentsExternalPackages: ['@auth/core'],
-  },
+  serverExternalPackages: ['@auth/core'],
   images: {
     remotePatterns: [
       {

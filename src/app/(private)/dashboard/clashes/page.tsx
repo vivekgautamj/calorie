@@ -8,8 +8,24 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 
+interface Option {
+  text: string;
+  image_url: string;
+}
+
+interface Clash {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  status: string;
+  show_cta: boolean;
+  slug?: string;
+  options: Option[];
+}
+
 const ClashesPage = () => {
-  const [clashes, setClashes] = useState<any[]>([]);
+  const [clashes, setClashes] = useState<Clash[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -77,7 +93,7 @@ const ClashesPage = () => {
             <>
               <div className="flex flex-col gap-4">
                 {clashes.map((clash) => (
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row gap-2" key={clash.id}>
                     <div className="flex flex-col gap-2 w-full">
                       <h3 className="text-lg font-medium">{clash.title}</h3>
                       <p className="text-sm text-muted-foreground">
@@ -100,8 +116,8 @@ const ClashesPage = () => {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      {clash.options.map((option: any) => (
-                        <div className="flex flex-col gap-2">
+                      {clash.options.map((option, idx) => (
+                        <div className="flex flex-col gap-2" key={option.text + idx}>
                           <p className="text-sm text-muted-foreground">
                             {option.text}
                           </p>
