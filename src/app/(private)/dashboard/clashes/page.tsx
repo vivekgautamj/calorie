@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { getFullUrl } from "@/lib/config";
 
 interface Option {
   text: string;
@@ -144,7 +145,7 @@ const ClashesPage = () => {
                     size="sm"
                     variant="secondary"
                     onClick={() => {
-                      navigator.clipboard.writeText(`https://clsh.app/vote/${clash.slug || clash.id}`);
+                      navigator.clipboard.writeText(getFullUrl(`/vote/${clash.slug || clash.id}`));
                       toast.success("Link copied!");
                     }}
                   >
@@ -158,7 +159,7 @@ const ClashesPage = () => {
                         navigator.share({
                           title: clash.title,
                           text: "Vote on this clash!",
-                          url: `https://clsh.app/vote/${clash.slug || clash.id}`,
+                          url: getFullUrl(`/vote/${clash.slug || clash.id}`),
                         });
                       }}
                     >

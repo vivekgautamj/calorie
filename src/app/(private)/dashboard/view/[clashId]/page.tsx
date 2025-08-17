@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { getFullUrl } from "@/lib/config";
 
 interface ClashOption {
   id: string;
@@ -141,7 +142,7 @@ const ViewClashPage = () => {
             variant="secondary"
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://clsh.app/vote/${clash.slug || clash.id}`
+                getFullUrl(`/vote/${clash.slug || clash.id}`)
               );
               toast.success("Link copied!");
             }}
@@ -156,7 +157,7 @@ const ViewClashPage = () => {
                 navigator.share({
                   title: clash.title,
                   text: "Vote on this clash!",
-                  url: `https://clsh.app/vote/${clash.slug || clash.id}`,
+                  url: getFullUrl(`/vote/${clash.slug || clash.id}`),
                 });
               }}
             >
